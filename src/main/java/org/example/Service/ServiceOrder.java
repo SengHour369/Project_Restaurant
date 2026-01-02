@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface ServiceOrder {
     OrderResponse createOrder(OrderRequest orderRequest);
-    OrderResponse updateOrder(OrderRequest orderRequest);
-    void deleteOrder(OrderRequest orderRequest);
-    OrderResponse findOrderById(OrderRequest orderRequest);
+    OrderResponse updateOrder(int orderId, OrderRequest r);
+    void deleteOrder(int orderId);
+    OrderResponse findOrderById(int orderId);
     List<OrderResponse> findAllOrders();
 }

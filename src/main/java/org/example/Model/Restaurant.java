@@ -1,37 +1,33 @@
 package org.example.Model;
 
+import org.example.BaseEntity;
+
 import java.time.LocalDateTime;
 
-public class Restaurant {
-    private String code;
+public class Restaurant extends BaseEntity {
     private String name;
     private String category;
     private Integer rating;
     private String phone_number;
     private String location;
-    private LocalDateTime opening_date;
-    private LocalDateTime closing_date;
 
-    public Restaurant(String code, String name, String category, Integer rating,
+
+    public Restaurant( String name, String category, Integer rating,
                       String phone_number, String location,
                       LocalDateTime opening_date, LocalDateTime closing_date) {
-        this.code = code;
+
         this.name = name;
         this.category = category;
         this.rating = rating;
         this.phone_number = phone_number;
         this.location = location;
-        this.opening_date = opening_date;
-        this.closing_date = closing_date;
+
     }
 
-    public String getCode() {
-        return code;
+    public Restaurant() {
+
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public String getName() {
         return name;
@@ -73,19 +69,5 @@ public class Restaurant {
         this.location = location;
     }
 
-    public LocalDateTime getOpening_date() {
-        return opening_date;
-    }
 
-    public void setOpening_date(LocalDateTime opening_date) {
-        this.opening_date = opening_date;
-    }
-
-    public LocalDateTime getClosing_date() {
-        return closing_date;
-    }
-
-    public void setClosing_date(LocalDateTime closing_date) {
-        this.closing_date = closing_date;
-    }
 }

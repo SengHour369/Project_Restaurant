@@ -1,6 +1,8 @@
 package org.example.Model;
 
-public class MenuItem {
+import org.example.BaseEntity;
+
+public class MenuItem extends BaseEntity {
     private Restaurant restaurant;
     private String code;
     private String name;

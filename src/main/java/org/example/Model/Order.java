@@ -1,9 +1,11 @@
 package org.example.Model;
 
+import org.example.BaseEntity;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class Order {
+public class Order extends BaseEntity {
     private LocalDateTime orderDate;
     private Double totalPrice;
     private User user;

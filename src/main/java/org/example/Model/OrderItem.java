@@ -1,8 +1,10 @@
 package org.example.Model;
 
+import org.example.BaseEntity;
+
 import java.util.List;
 
-public class OrderItem {
+public class OrderItem extends BaseEntity {
     private Integer quantity;
     private Double price;
     private Order order;

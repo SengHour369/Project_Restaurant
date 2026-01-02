@@ -1,19 +1,20 @@
 package org.example.Model;
 
-import org.example.Enumeration.Gender;
 
-public class User {
-    private String name;
-    private Gender gender;
-    private String data_of_birth;
-    private String phone_number;
-    private String Address;
-    private String email;
-    private String Status;
+import org.example.BaseEntity;
 
-    public User(String name, Gender gender, String data_of_birth,
-                String phone_number, String address, String email, String status) {
-        this.name = name;
+public class User extends BaseEntity {
+    private java.lang.String username;
+    private String gender;
+    private java.lang.String data_of_birth;
+    private java.lang.String phone_number;
+    private java.lang.String Address;
+    private java.lang.String email;
+    private java.lang.String Status;
+
+    public User(java.lang.String name, String gender, java.lang.String data_of_birth,
+                java.lang.String phone_number, java.lang.String address, java.lang.String email, java.lang.String status) {
+        this.username = name;
         this.gender = gender;
         this.data_of_birth = data_of_birth;
         this.phone_number = phone_number;
@@ -22,66 +23,70 @@ public class User {
         Status = status;
     }
 
-    public String getName() {
-        return name;
+    public User() {
     }
 
-    public Gender getGender() {
+    public java.lang.String getUsername() {
+        return username;
+    }
+
+    public String getGender() {
         return gender;
     }
 
-    public String getData_of_birth() {
+    public java.lang.String getData_of_birth() {
         return data_of_birth;
     }
 
-    public String getPhone_number() {
+    public java.lang.String getPhone_number() {
         return phone_number;
     }
 
-    public String getAddress() {
+    public java.lang.String getAddress() {
         return Address;
     }
 
-    public String getEmail() {
+    public java.lang.String getEmail() {
         return email;
     }
 
-    public String getStatus() {
+    public java.lang.String getStatus() {
         return Status;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(java.lang.String username) {
+        this.username = username;
     }
 
-    public void setGender(Gender gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
-    public void setData_of_birth(String data_of_birth) {
+    public void setData_of_birth(java.lang.String data_of_birth) {
         this.data_of_birth = data_of_birth;
     }
 
-    public void setPhone_number(String phone_number) {
+    public void setPhone_number(java.lang.String phone_number) {
         this.phone_number = phone_number;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(java.lang.String address) {
         Address = address;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(java.lang.String email) {
         this.email = email;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(java.lang.String status) {
         Status = status;
     }
 
+
     @Override
-    public String toString() {
+    public java.lang.String toString() {
         return "User{" +
-                "name='" + name + '\'' +
+                "name='" + username + '\'' +
                 ", gender='" + gender + '\'' +
                 ", data_of_birth='" + data_of_birth + '\'' +
                 ", phone_number='" + phone_number + '\'' +

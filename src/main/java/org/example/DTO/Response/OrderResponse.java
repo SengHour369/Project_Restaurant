@@ -1,5 +1,6 @@
 package org.example.DTO.Response;
 
+import org.example.BaseEntity;
 import org.example.Model.OrderItem;
 import org.example.Model.Payment;
 import org.example.Model.Restaurant;
@@ -8,7 +9,7 @@ import org.example.Model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class OrderResponse {
+public class OrderResponse extends BaseEntity {
     private LocalDateTime orderDate;
     private Double totalPrice;
     private User user;

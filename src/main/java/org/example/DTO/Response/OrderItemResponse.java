@@ -1,11 +1,12 @@
 package org.example.DTO.Response;
 
+import org.example.BaseEntity;
 import org.example.Model.MenuItem;
 import org.example.Model.Order;
 
 import java.util.List;
 
-public class OrderItemResponse {
+public class OrderItemResponse  extends BaseEntity {
     private Integer quantity;
     private Double price;
     private Order order;

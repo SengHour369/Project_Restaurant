@@ -6,9 +6,9 @@ import org.example.DTO.Response.RestaurantResponse;
 import java.util.List;
 
 public interface ServiceRestaurant {
-    RestaurantResponse CreateRestaurant(RestaurantRequest restaurantRequest);
+    void CreateRestaurant(RestaurantRequest restaurantRequest);
     List<RestaurantResponse> findAllRestaurants();
-    RestaurantResponse findRestaurantById(RestaurantRequest restaurantRequest);
-    RestaurantResponse updateRestaurant(RestaurantRequest restaurantRequest);
-    void deleteRestaurant(RestaurantRequest restaurantRequest);
+    RestaurantResponse findRestaurantById(int id);
+    RestaurantResponse updateRestaurant(RestaurantRequest restaurantRequest,int id);
+    void deleteRestaurant(int id);
 }

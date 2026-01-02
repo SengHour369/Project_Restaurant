@@ -1,8 +1,9 @@
 package org.example.DTO.Response;
 
+import org.example.BaseEntity;
 import org.example.Model.Restaurant;
 
-public class MenuItemResponse {
+public class MenuItemResponse extends BaseEntity {
     private Restaurant restaurant;
     private String code;
     private String name;
