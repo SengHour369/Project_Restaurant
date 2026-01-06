@@ -28,6 +28,9 @@ public class Restaurant extends BaseEntity {
 
     }
 
+    public Restaurant(int restaurantId) {
+        this.setId(restaurantId);
+    }
 
     public String getName() {
         return name;

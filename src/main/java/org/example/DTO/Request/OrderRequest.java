@@ -1,6 +1,7 @@
 package org.example.DTO.Request;
 
 import org.example.BaseEntity;
+import org.example.DTO.Response.RestaurantResponse;
 import org.example.Model.OrderItem;
 import org.example.Model.Payment;
 import org.example.Model.Restaurant;
@@ -13,13 +14,13 @@ public class OrderRequest extends BaseEntity {
     private LocalDateTime orderDate;
     private Double totalPrice;
     private User user;
-    private Restaurant restaurant;
-    private List<OrderItem> orderItems;
+    private RestaurantResponse restaurant;
+    private List<OrderItemRequest> orderItems;
     private Payment payment;
 
     public OrderRequest(LocalDateTime orderDate, Double totalPrice,
-                 User user, Restaurant restaurant, List<OrderItem> orderItems,
-                 Payment payment) {
+                        User user, RestaurantResponse restaurant, List<OrderItemRequest> orderItems,
+                        Payment payment) {
         this.orderDate = orderDate;
         this.totalPrice = totalPrice;
         this.user = user;
@@ -28,51 +29,25 @@ public class OrderRequest extends BaseEntity {
         this.payment = payment;
     }
 
-    public LocalDateTime getOrderDate() {
-        return orderDate;
+    public OrderRequest() {
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
+    // ---------- Getters & Setters ----------
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
 
-    public Double getTotalPrice() {
-        return totalPrice;
-    }
+    public Double getTotalPrice() { return totalPrice; }
+    public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
 
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public User getUser() {
-        return user;
-    }
+    public RestaurantResponse getRestaurant() { return restaurant; }
+    public void setRestaurant(RestaurantResponse restaurant) { this.restaurant = restaurant; }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+    public List<OrderItemRequest> getOrderItems() { return orderItems; }
+    public void setOrderItems(List<OrderItemRequest> orderItems) { this.orderItems = orderItems; }
 
-    public Restaurant getRestaurant() {
-        return restaurant;
-    }
-
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
-    }
-
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
-
-    public Payment getPayment() {
-        return payment;
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
+    public Payment getPayment() { return payment; }
+    public void setPayment(Payment payment) { this.payment = payment; }
 }

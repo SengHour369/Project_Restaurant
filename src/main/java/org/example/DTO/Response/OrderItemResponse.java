@@ -1,53 +1,36 @@
 package org.example.DTO.Response;
 
 import org.example.BaseEntity;
-import org.example.Model.MenuItem;
-import org.example.Model.Order;
 
-import java.util.List;
+public class OrderItemResponse extends BaseEntity {
 
-public class OrderItemResponse  extends BaseEntity {
+    private Integer orderId;
+    private Integer menuItemId;
     private Integer quantity;
     private Double price;
-    private Order order;
-    private List<MenuItem> menuItem;
 
-    public OrderItemResponse(Integer quantity, Double price, Order order, List<MenuItem> menuItem) {
+    public OrderItemResponse(int id, Integer orderId, Integer menuItemId,
+                             Integer quantity, Double price) {
+        setId(id);
+        this.orderId = orderId;
+        this.menuItemId = menuItemId;
         this.quantity = quantity;
         this.price = price;
-        this.order = order;
-        this.menuItem = menuItem;
+    }
+
+    public Integer getOrderId() {
+        return orderId;
+    }
+
+    public Integer getMenuItemId() {
+        return menuItemId;
     }
 
     public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public Double getPrice() {
         return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public List<MenuItem> getMenuItem() {
-        return menuItem;
-    }
-
-    public void setMenuItem(List<MenuItem> menuItem) {
-        this.menuItem = menuItem;
     }
 }

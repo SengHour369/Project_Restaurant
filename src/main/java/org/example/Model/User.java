@@ -26,6 +26,16 @@ public class User extends BaseEntity {
     public User() {
     }
 
+    public User(int i) {
+        super();
+    }
+
+    public User(int id, String name) {
+        this.setId(id);
+        this.setUsername(name);
+
+    }
+
     public java.lang.String getUsername() {
         return username;
     }

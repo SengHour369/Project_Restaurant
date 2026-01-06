@@ -1,165 +1,202 @@
 package org.example.Service.ServiceImplement;
 
-import org.example.Database.DatabaseConnection;
 import org.example.DTO.Request.OrderRequest;
+import org.example.DTO.Request.OrderItemRequest;
 import org.example.DTO.Response.OrderResponse;
-import org.example.Model.User;
-import org.example.Model.Restaurant;
+import org.example.DTO.Response.RestaurantResponse;
+import org.example.Exception.MessageException;
+import org.example.Model.OrderItem;
 import org.example.Model.Payment;
+import org.example.Model.User;
 import org.example.Service.ServiceOrder;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.Database.DatabaseConnection.getConnection;
+
 public class ServiceOrderImp implements ServiceOrder {
 
-
     @Override
-    public OrderResponse createOrder(OrderRequest r) {
+    public OrderResponse createOrder(OrderRequest orderRequest) throws MessageException {
+        try (Connection conn = getConnection()) {
 
-        String sql = """
-            INSERT INTO orders
-            (order_date, total_price, user_id, restaurants_id, payment_id)
-            VALUES (?, ?, ?, ?, ?)
+            conn.setAutoCommit(false);
+
+
+            String sqlPayment = """
+            INSERT INTO payments(amount, type)
+            VALUES (?,?) RETURNING id
         """;
 
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps =
-                     con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement psPay = conn.prepareStatement(sqlPayment);
+            psPay.setDouble(1, orderRequest.getTotalPrice());
+            psPay.setString(2, "PAID");
 
-            ps.setTimestamp(1, Timestamp.valueOf(r.getOrderDate()));
-            ps.setDouble(2, r.getTotalPrice());
-            ps.setInt(3, r.getUser().getId());
-            ps.setInt(4, r.getRestaurant().getId());
-            ps.setInt(5, r.getPayment().getId());
+            ResultSet rsPay = psPay.executeQuery();
+            rsPay.next();
+            int paymentId = rsPay.getInt("id");
 
-            ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return findOrderById(rs.getInt(1));
+            String sqlOrder = """
+            INSERT INTO orders(order_date, total_price, user_id, restaurants_id, payment_id)
+            VALUES (?,?,?,?,?) RETURNING id
+        """;
+
+            PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
+            psOrder.setTimestamp(1, Timestamp.valueOf(orderRequest.getOrderDate()));
+            psOrder.setDouble(2, orderRequest.getTotalPrice());
+            psOrder.setInt(3, orderRequest.getUser().getId());
+            psOrder.setInt(4, orderRequest.getRestaurant().getId());
+            psOrder.setInt(5, paymentId);
+
+            ResultSet rsOrder = psOrder.executeQuery();
+            rsOrder.next();
+            int orderId = rsOrder.getInt("id");
+
+
+            List<OrderItem> orderItems = new ArrayList<>();
+
+            for (OrderItemRequest itemReq : orderRequest.getOrderItems()) {
+                String sqlItem = """
+                INSERT INTO orderitems(order_id, menu_item_id, quantity, price)
+                VALUES (?,?,?,?) RETURNING id
+            """;
+
+                PreparedStatement psItem = conn.prepareStatement(sqlItem);
+                psItem.setInt(1, orderId);
+                psItem.setInt(2, itemReq.getMenuItemId());
+                psItem.setInt(3, itemReq.getQuantity());
+                psItem.setDouble(4, itemReq.getPrice());
+
+                ResultSet rsItem = psItem.executeQuery();
+                rsItem.next();
+
+                OrderItem item = new OrderItem();
+                item.setId(rsItem.getInt("id"));
+                item.setMenuItemId(itemReq.getMenuItemId());
+                item.setQuantity(itemReq.getQuantity());
+                item.setPrice(itemReq.getPrice());
+                orderItems.add(item);
             }
 
-        } catch (Exception e) {
+            conn.commit();
+
+            return new OrderResponse(
+                    orderId,
+                    orderRequest.getOrderDate(),
+                    orderRequest.getTotalPrice(),
+                    orderRequest.getUser(),
+                    orderRequest.getRestaurant(),
+                    orderItems,
+                    new Payment(paymentId)
+            );
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new MessageException("Failed to create order: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteOrder(int orderId) throws MessageException {
+        try (Connection conn = getConnection()) {
+
+            PreparedStatement ps1 = conn.prepareStatement(
+                    "DELETE FROM order_items WHERE order_id=?");
+            ps1.setInt(1, orderId);
+            ps1.executeUpdate();
+
+            PreparedStatement ps2 = conn.prepareStatement(
+                    "DELETE FROM orders WHERE id=?");
+            ps2.setInt(1, orderId);
+            ps2.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new MessageException("Failed to delete order");
+        }
+    }
+
+    @Override
+    public OrderResponse findOrderById(int orderId) {
+        try (Connection conn = getConnection()) {
+
+            PreparedStatement psOrder =
+                    conn.prepareStatement("SELECT * FROM orders WHERE id=?");
+            psOrder.setInt(1, orderId);
+
+            ResultSet rsOrder = psOrder.executeQuery();
+            if (!rsOrder.next()) return null;
+
+            LocalDateTime orderDate =
+                    rsOrder.getTimestamp("order_date").toLocalDateTime();
+
+            double total = rsOrder.getDouble("total_price");
+            int userId = rsOrder.getInt("user_id");
+            int restaurantId = rsOrder.getInt("restaurant_id");
+            int paymentId = rsOrder.getInt("payment_id");
+
+            List<OrderItem> items = new ArrayList<>();
+
+            PreparedStatement psItems =
+                    conn.prepareStatement("SELECT * FROM order_items WHERE order_id=?");
+            psItems.setInt(1, orderId);
+
+            ResultSet rsItems = psItems.executeQuery();
+            while (rsItems.next()) {
+                OrderItem item = new OrderItem();
+                item.setId(rsItems.getInt("id"));
+                item.setMenuItemId(rsItems.getInt("menu_item_id")); // ✅ FIXED
+                item.setQuantity(rsItems.getInt("quantity"));
+                item.setPrice(rsItems.getDouble("price"));
+                items.add(item);
+            }
+
+            return new OrderResponse(
+                    orderId,
+                    orderDate,
+                    total,
+                    new User(userId),
+                    new RestaurantResponse(restaurantId),
+                    items,
+                    new Payment(paymentId)
+            );
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return null;
+    }
+    @Override
+    public List<OrderResponse> findAllOrders() {
+        List<OrderResponse> list = new ArrayList<>();
+
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps =
+                    conn.prepareStatement("SELECT id FROM orders ORDER BY order_date DESC");
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                OrderResponse o = findOrderById(rs.getInt("id"));
+                if (o != null) {
+                    list.add(o);
+                } else {
+                    System.out.println("Warning: order not found for id = " + rs.getInt("id"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
 
     @Override
     public OrderResponse updateOrder(int orderId, OrderRequest r) {
-
-        String sql = """
-            UPDATE orders SET
-            order_date=?, total_price=?, user_id=?, restaurants_id=?, payment_id=?
-            WHERE id=?
-        """;
-
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setTimestamp(1, Timestamp.valueOf(r.getOrderDate()));
-            ps.setDouble(2, r.getTotalPrice());
-            ps.setInt(3, r.getUser().getId());
-            ps.setInt(4, r.getRestaurant().getId());
-            ps.setInt(5, r.getPayment().getId());
-            ps.setInt(6, orderId);
-
-            ps.executeUpdate();
-            return findOrderById(orderId);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         return null;
-    }
-
-
-    @Override
-    public void deleteOrder(int orderId) {
-
-        String sql = "DELETE FROM orders WHERE id=?";
-
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, orderId);
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @Override
-    public OrderResponse findOrderById(int orderId) {
-
-        String sql = "SELECT * FROM orders WHERE id=?";
-
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, orderId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return mapToOrderResponse(rs);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-
-    @Override
-    public List<OrderResponse> findAllOrders() {
-
-        List<OrderResponse> list = new ArrayList<>();
-
-        String sql = "SELECT * FROM orders";
-
-        try (Connection con = DatabaseConnection.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-
-            while (rs.next()) {
-                list.add(mapToOrderResponse(rs));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-
-    private OrderResponse mapToOrderResponse(ResultSet rs) throws SQLException {
-
-        User user = new User();
-        user.setId(rs.getInt("user_id"));
-
-        Restaurant restaurant = new Restaurant();
-        restaurant.setId(rs.getInt("restaurants_id"));
-
-        Payment payment = new Payment();
-        payment.setId(rs.getInt("payment_id"));
-
-        return new OrderResponse(
-                rs.getTimestamp("order_date").toLocalDateTime(),
-                rs.getDouble("total_price"),
-                user,
-                restaurant,
-                null,
-                payment
-        );
     }
 }

@@ -2,7 +2,7 @@ package org.example.DTO.Response;
 
 import org.example.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.awt.event.ActionListener;
 
 public class RestaurantResponse extends BaseEntity {
     private String name;
@@ -21,6 +21,10 @@ public class RestaurantResponse extends BaseEntity {
         this.phone_number = phone_number;
         this.location = location;
 
+    }
+
+    public RestaurantResponse(int restaurantId) {
+        this.setId(restaurantId);
     }
 
     public String getName() {

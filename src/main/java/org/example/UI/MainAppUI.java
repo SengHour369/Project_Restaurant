@@ -1,25 +1,19 @@
 package org.example.UI;
 
+import org.example.DTO.Response.UserResponse;
+
 import javax.swing.*;
 
 public class MainAppUI extends JFrame {
 
-    public MainAppUI() {
-        setTitle("Management System");
-        setSize(1000, 600);
+    public MainAppUI(UserResponse user) {
+        setTitle("Order System");
+        setSize(1000,600);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // center the window
 
-        // Create tabbed pane
-        JTabbedPane tabbedPane = new JTabbedPane();
-
-        // Add tabs
-        tabbedPane.addTab("Users", new UserPanel());
-        tabbedPane.addTab("Restaurants", new RestaurantPanel());
-        tabbedPane.addTab("Payments", new PaymentPanel());
-        tabbedPane.addTab("Orders", new OrderPanel());
-
-        add(tabbedPane);
-
+        JTabbedPane tab = new JTabbedPane();
+        tab.addTab("Order", new OrderPanel(user));
+        add(tab);
     }
 }

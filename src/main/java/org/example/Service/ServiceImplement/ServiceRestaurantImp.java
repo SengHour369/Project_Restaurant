@@ -4,6 +4,8 @@ import org.example.Database.DatabaseConnection;
 import org.example.DTO.Request.RestaurantRequest;
 import org.example.DTO.Response.RestaurantResponse;
 
+import org.example.Exception.MessageException;
+import org.example.Service.ServiceHandler.RestaurantServiceHandler;
 import org.example.Service.ServiceRestaurant;
 
 import java.sql.*;
@@ -11,18 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRestaurantImp implements ServiceRestaurant {
-
+     RestaurantServiceHandler restaurantServiceHandler =  new RestaurantServiceHandler();
     @Override
-    public void CreateRestaurant(RestaurantRequest r) {
+    public void CreateRestaurant(RestaurantRequest r) throws MessageException {
+        restaurantServiceHandler.hasValidCategory(r.getCategory());
+        restaurantServiceHandler.hasValidPhone(r.getPhone_number());
+        restaurantServiceHandler.CategoryExists(r.getCategory());
+        restaurantServiceHandler.phoneExist(r.getPhone_number());
+
         String sql = """
         INSERT INTO restaurants
-        (code, name, category, rating, phone_number, location)
-        VALUES (?, ?, ?, ?, ?, ?)
+        ( name, category, rating, phone_number, location)
+        VALUES ( ?, ?, ?, ?, ?)
     """;
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setString(1, r.getName());
             ps.setString(2, r.getCategory());
             ps.setInt(3, r.getRating());
@@ -118,7 +124,6 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
             e.printStackTrace();
         }
     }
-
 
     private RestaurantResponse mapToResponse(ResultSet rs) throws SQLException {
         return new RestaurantResponse(

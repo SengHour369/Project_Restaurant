@@ -1,47 +1,36 @@
 package org.example.DTO.Response;
 
-import org.example.BaseEntity;
-
-public class UserResponse extends BaseEntity {
-
+public class UserResponse {
+    private int id;
     private String name;
     private String gender;
-    private String data_of_birth;
-    private String phone_number;
+    private String dateOfBirth;
+    private String phone;
     private String address;
     private String email;
     private String status;
 
-    // setters
-    public void setName(String name) { this.name = name; }
-    public void setGender(String gender) { this.gender = gender; }
-    public void setData_of_birth(String data_of_birth) { this.data_of_birth = data_of_birth; }
-    public void setPhone_number(String phone_number) { this.phone_number = phone_number; }
-    public void setAddress(String address) { this.address = address; }
-    public void setEmail(String email) { this.email = email; }
-    public void setStatus(String status) { this.status = status; }
-
-    // getters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getName() { return name; }
-    public String getGender() { return gender; }
-    public String getData_of_birth() { return data_of_birth; }
-    public String getPhone_number() { return phone_number; }
-    public String getAddress() { return address; }
-    public String getEmail() { return email; }
-    public String getStatus() { return status; }
+    public void setName(String name) { this.name = name; }
 
-    @Override
-    public String toString() {
-        return "UserResponse{" +
-                "id=" + getId() +
-                "name='" + name + '\'' +
-                ", gender='" + gender + '\'' +
-                ", data_of_birth='" + data_of_birth + '\'' +
-                ", phone_number='" + phone_number + '\'' +
-                ", address='" + address + '\'' +
-                ", email='" + email + '\'' +
-                ", status='" + status + '\'' +
-                '}';
-    }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public String getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

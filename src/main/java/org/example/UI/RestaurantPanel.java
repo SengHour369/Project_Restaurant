@@ -2,6 +2,7 @@ package org.example.UI;
 
 import org.example.DTO.Request.RestaurantRequest;
 import org.example.DTO.Response.RestaurantResponse;
+import org.example.Exception.MessageException;
 import org.example.Service.ServiceImplement.ServiceRestaurantImp;
 
 import javax.swing.*;
@@ -11,7 +12,6 @@ import java.util.List;
 public class RestaurantPanel extends JPanel {
 
     JTextField txtId = new JTextField();
-    JTextField txtCode = new JTextField();
     JTextField txtName = new JTextField();
     JTextField txtCategory = new JTextField();
     JTextField txtRating = new JTextField();
@@ -20,7 +20,7 @@ public class RestaurantPanel extends JPanel {
 
 
     DefaultTableModel model = new DefaultTableModel(
-            new String[]{"ID","Code","Name","Category","Rating","Phone","Location"}, 0
+            new String[]{"ID","Name","Category","Rating","Phone","Location"}, 0
     );
 
     JTable table = new JTable(model);
@@ -30,7 +30,6 @@ public class RestaurantPanel extends JPanel {
         setLayout(null);
 
         addLabel("ID",10,10); addField(txtId,120,10);
-        addLabel("Code",10,40); addField(txtCode,120,40);
         addLabel("Name",10,70); addField(txtName,120,70);
         addLabel("Category",10,100); addField(txtCategory,120,100);
         addLabel("Rating",10,130); addField(txtRating,120,130);
@@ -55,7 +54,13 @@ public class RestaurantPanel extends JPanel {
         add(sp);
 
 
-        btnAdd.addActionListener(e -> { service.CreateRestaurant(readForm()); loadTable(); });
+        btnAdd.addActionListener(e -> {
+            try {
+                service.CreateRestaurant(readForm());
+            } catch (MessageException ex) {
+                throw new RuntimeException(ex);
+            }
+            loadTable(); });
         btnUpdate.addActionListener(e -> { service.updateRestaurant(readForm(), Integer.parseInt(txtId.getText())); loadTable(); });
         btnDelete.addActionListener(e -> { service.deleteRestaurant(Integer.parseInt(txtId.getText())); loadTable(); });
         btnLoad.addActionListener(e -> loadTable());

@@ -4,35 +4,39 @@ import org.example.BaseEntity;
 import org.example.Model.Restaurant;
 
 public class MenuItemRequest extends BaseEntity {
-    private Restaurant restaurant;
-    private String code;
+    private int restaurant;
+    private String price;
     private String name;
     private String description;
     private Boolean active;
 
-    public MenuItemRequest(Restaurant restaurant, String code,
+    public MenuItemRequest(int restaurant, String code,
                     String name, String description, Boolean active) {
         this.restaurant = restaurant;
-        this.code = code;
+        this.price = code;
         this.name = name;
         this.description = description;
         this.active = active;
     }
 
-    public Restaurant getRestaurant() {
+    public MenuItemRequest() {
+
+    }
+
+    public int getRestaurant() {
         return restaurant;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
+    public void setRestaurant(int restaurant) {
         this.restaurant = restaurant;
     }
 
-    public String getCode() {
-        return code;
+    public String getPrice() {
+        return price;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public String getName() {

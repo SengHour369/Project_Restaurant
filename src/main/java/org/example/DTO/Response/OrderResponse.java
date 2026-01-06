@@ -13,13 +13,13 @@ public class OrderResponse extends BaseEntity {
     private LocalDateTime orderDate;
     private Double totalPrice;
     private User user;
-    private Restaurant restaurant;
+    private RestaurantResponse restaurant;
     private List<OrderItem> orderItems;
     private Payment payment;
 
-    public OrderResponse(LocalDateTime orderDate, Double totalPrice,
-                 User user, Restaurant restaurant, List<OrderItem> orderItems,
-                 Payment payment) {
+    public OrderResponse(int id, LocalDateTime orderDate, Double totalPrice,
+                         User user, RestaurantResponse restaurant, List<OrderItem> orderItems,
+                         Payment payment) {
         this.orderDate = orderDate;
         this.totalPrice = totalPrice;
         this.user = user;
@@ -52,11 +52,11 @@ public class OrderResponse extends BaseEntity {
         this.user = user;
     }
 
-    public Restaurant getRestaurant() {
+    public RestaurantResponse getRestaurant() {
         return restaurant;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
+    public void setRestaurant(RestaurantResponse restaurant) {
         this.restaurant = restaurant;
     }
 

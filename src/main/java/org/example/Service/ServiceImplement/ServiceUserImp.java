@@ -15,8 +15,8 @@ public class ServiceUserImp implements ServiceUser {
     public void create(UserRequest r) {
         String sql = """
             INSERT INTO users
-            (name, gender, date_of_birth, phone_number, address, email, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (name, gender, date_of_birth, phone_number, address, email, password, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection c = DatabaseConnection.getConnection();
@@ -24,11 +24,12 @@ public class ServiceUserImp implements ServiceUser {
 
             ps.setString(1, r.getName());
             ps.setString(2, r.getGender());
-            ps.setString(3, r.getData_of_birth());
-            ps.setString(4, r.getPhone_number());
+            ps.setString(3, r.getDateOfBirth());
+            ps.setString(4, r.getPhone());
             ps.setString(5, r.getAddress());
             ps.setString(6, r.getEmail());
-            ps.setString(7, r.getStatus());
+            ps.setString(7, r.getPassword());
+            ps.setString(8, r.getStatus());
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -41,7 +42,7 @@ public class ServiceUserImp implements ServiceUser {
         String sql = """
             UPDATE users SET
             name=?, gender=?, date_of_birth=?, phone_number=?,
-            address=?, email=?, status=?
+            address=?, email=?, password=?, status=?
             WHERE id=?
         """;
 
@@ -50,12 +51,13 @@ public class ServiceUserImp implements ServiceUser {
 
             ps.setString(1, r.getName());
             ps.setString(2, r.getGender());
-            ps.setString(3, r.getData_of_birth());
-            ps.setString(4, r.getPhone_number());
+            ps.setString(3, r.getDateOfBirth());
+            ps.setString(4, r.getPhone());
             ps.setString(5, r.getAddress());
             ps.setString(6, r.getEmail());
-            ps.setString(7, r.getStatus());
-            ps.setInt(8, id);
+            ps.setString(7, r.getPassword());
+            ps.setString(8, r.getStatus());
+            ps.setInt(9, id);
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -79,25 +81,15 @@ public class ServiceUserImp implements ServiceUser {
 
     @Override
     public UserResponse findById(int id) {
+        String sql = "SELECT * FROM users WHERE id=?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps =
-                     c.prepareStatement("SELECT * FROM users WHERE id=?")) {
+             PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                UserResponse u = new UserResponse();
-                u.setId(rs.getInt("id"));
-                u.setName(rs.getString("name"));
-                u.setGender(rs.getString("gender"));
-                u.setData_of_birth(rs.getString("date_of_birth"));
-                u.setPhone_number(rs.getString("phone_number"));
-                u.setAddress(rs.getString("address"));
-                u.setEmail(rs.getString("email"));
-                u.setStatus(rs.getString("status"));
-                return u;
-            }
+            if (rs.next()) return map(rs);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,28 +99,46 @@ public class ServiceUserImp implements ServiceUser {
     @Override
     public List<UserResponse> findAll() {
         List<UserResponse> list = new ArrayList<>();
-
         try (Connection c = DatabaseConnection.getConnection();
              Statement st = c.createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM users")) {
 
-            while (rs.next()) {
-                UserResponse u = new UserResponse();
-                u.setId(rs.getInt("id"));
-                u.setName(rs.getString("name"));
-                u.setGender(rs.getString("gender"));
-                u.setData_of_birth(rs.getString("date_of_birth"));
-                u.setPhone_number(rs.getString("phone_number"));
-                u.setAddress(rs.getString("address"));
-                u.setEmail(rs.getString("email"));
-                u.setStatus(rs.getString("status"));
-                list.add(u);
-            }
+            while (rs.next()) list.add(map(rs));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("ncjdbcf" +list);
         return list;
+    }
+
+    @Override
+    public UserResponse login(String email, String password) {
+        String sql = "SELECT * FROM users WHERE email=? AND password=?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) return map(rs);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private UserResponse map(ResultSet rs) throws SQLException {
+        UserResponse u = new UserResponse();
+        u.setId(rs.getInt("id"));
+        u.setName(rs.getString("name"));
+        u.setGender(rs.getString("gender"));
+        u.setDateOfBirth(rs.getString("date_of_birth"));
+        u.setPhone(rs.getString("phone_number"));
+        u.setAddress(rs.getString("address"));
+        u.setEmail(rs.getString("email"));
+        u.setStatus(rs.getString("status"));
+        return u;
     }
 }

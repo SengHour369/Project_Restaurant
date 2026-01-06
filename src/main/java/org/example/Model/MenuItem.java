@@ -4,15 +4,15 @@ import org.example.BaseEntity;
 
 public class MenuItem extends BaseEntity {
     private Restaurant restaurant;
-    private String code;
+    private Double price;
     private String name;
     private String description;
     private Boolean active;
 
-    public MenuItem(Restaurant restaurant, String code,
+    public MenuItem(Restaurant restaurant, Double code,
                     String name, String description, Boolean active) {
         this.restaurant = restaurant;
-        this.code = code;
+        this.price = code;
         this.name = name;
         this.description = description;
         this.active = active;
@@ -26,12 +26,12 @@ public class MenuItem extends BaseEntity {
         this.restaurant = restaurant;
     }
 
-    public String getCode() {
-        return code;
+    public Double getPrice() {
+        return price;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public String getName() {

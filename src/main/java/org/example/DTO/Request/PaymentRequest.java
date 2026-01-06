@@ -12,7 +12,11 @@ public class PaymentRequest extends BaseEntity {
             this.amount = amount;
         }
 
-        public String getType() {
+    public PaymentRequest() {
+
+    }
+
+    public String getType() {
             return type;
         }
 
