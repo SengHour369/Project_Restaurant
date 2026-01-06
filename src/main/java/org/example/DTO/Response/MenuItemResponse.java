@@ -20,7 +20,6 @@ public class MenuItemResponse extends BaseEntity {
     }
 
     public MenuItemResponse() {
-
     }
 
     public int getRestaurant() {

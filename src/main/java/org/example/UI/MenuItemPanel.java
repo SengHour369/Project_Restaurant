@@ -56,18 +56,17 @@ public class MenuItemPanel extends JPanel {
         add(btnUpdate);
         add(btnDelete);
 
-        // ===== LOAD DATA =====
+
         loadRestaurants();
         loadMenuItems();
 
-        // ===== EVENTS =====
+
         table.getSelectionModel().addListSelectionListener(e -> fillForm());
         btnAdd.addActionListener(e -> addMenuItem());
         btnUpdate.addActionListener(e -> updateMenuItem());
         btnDelete.addActionListener(e -> deleteMenuItem());
     }
 
-    // ================= ADD =================
     private void addMenuItem(){
         try{
             RestaurantResponse r =
@@ -77,7 +76,7 @@ public class MenuItemPanel extends JPanel {
             MenuItemRequest req = new MenuItemRequest();
             req.setName(txtName.getText());
             req.setPrice(txtPrice.getText());
-            req.setRestaurant(r.getId()); // ✅ restaurant ID
+            req.setRestaurant(r.getId());
             req.setActive(true);
 
             menuService.createMenuItem(req);
@@ -88,7 +87,6 @@ public class MenuItemPanel extends JPanel {
         }
     }
 
-    // ================= UPDATE =================
     private void updateMenuItem(){
         int row = table.getSelectedRow();
         if(row < 0) return;
@@ -101,7 +99,7 @@ public class MenuItemPanel extends JPanel {
             req.setId((int) model.getValueAt(row,0));
             req.setName(txtName.getText());
             req.setPrice(txtPrice.getText());
-            req.setRestaurant(r.getId()); // ✅
+            req.setRestaurant(r.getId());
             req.setActive(true);
 
             menuService.updateMenuItem(req);
@@ -112,7 +110,6 @@ public class MenuItemPanel extends JPanel {
         }
     }
 
-    // ================= DELETE =================
     private void deleteMenuItem(){
         int row = table.getSelectedRow();
         if(row < 0) return;
@@ -125,7 +122,6 @@ public class MenuItemPanel extends JPanel {
         clearForm();
     }
 
-    // ================= LOAD =================
     private void loadRestaurants(){
         cbRestaurant.removeAllItems();
         for(RestaurantResponse r : restaurantService.findAllRestaurants()){
@@ -145,7 +141,6 @@ public class MenuItemPanel extends JPanel {
         }
     }
 
-    // ================= FORM =================
     private void fillForm(){
         int row = table.getSelectedRow();
         if(row < 0) return;

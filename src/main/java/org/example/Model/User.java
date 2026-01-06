@@ -27,7 +27,7 @@ public class User extends BaseEntity {
     }
 
     public User(int i) {
-        super();
+        this.setId(i);
     }
 
     public User(int id, String name) {

@@ -4,11 +4,13 @@ import org.example.DTO.Request.OrderRequest;
 import org.example.DTO.Request.OrderItemRequest;
 import org.example.DTO.Response.OrderResponse;
 import org.example.DTO.Response.RestaurantResponse;
+import org.example.DTO.Response.UserResponse;
 import org.example.Exception.MessageException;
 import org.example.Model.OrderItem;
 import org.example.Model.Payment;
 import org.example.Model.User;
 import org.example.Service.ServiceOrder;
+import org.example.Service.ServiceUser;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -18,7 +20,8 @@ import java.util.List;
 import static org.example.Database.DatabaseConnection.getConnection;
 
 public class ServiceOrderImp implements ServiceOrder {
-
+   ServiceUserImp serviceUser = new ServiceUserImp();
+   ServiceRestaurantImp  serviceRestaurant = new ServiceRestaurantImp();
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) throws MessageException {
         try (Connection conn = getConnection()) {
@@ -136,31 +139,33 @@ public class ServiceOrderImp implements ServiceOrder {
 
             double total = rsOrder.getDouble("total_price");
             int userId = rsOrder.getInt("user_id");
-            int restaurantId = rsOrder.getInt("restaurant_id");
+            int restaurantId = rsOrder.getInt("restaurants_id");
             int paymentId = rsOrder.getInt("payment_id");
 
             List<OrderItem> items = new ArrayList<>();
 
             PreparedStatement psItems =
-                    conn.prepareStatement("SELECT * FROM order_items WHERE order_id=?");
+                    conn.prepareStatement("SELECT * FROM orderitems WHERE order_id=?");
             psItems.setInt(1, orderId);
 
             ResultSet rsItems = psItems.executeQuery();
             while (rsItems.next()) {
                 OrderItem item = new OrderItem();
                 item.setId(rsItems.getInt("id"));
-                item.setMenuItemId(rsItems.getInt("menu_item_id")); // ✅ FIXED
+                item.setMenuItemId(rsItems.getInt("menu_item_id"));
                 item.setQuantity(rsItems.getInt("quantity"));
                 item.setPrice(rsItems.getDouble("price"));
                 items.add(item);
             }
+            UserResponse user = serviceUser.findById(userId);
+            RestaurantResponse restaurantResponse=  serviceRestaurant.findRestaurantById(restaurantId);
 
             return new OrderResponse(
                     orderId,
                     orderDate,
                     total,
-                    new User(userId),
-                    new RestaurantResponse(restaurantId),
+                    new UserResponse(user),
+                    new RestaurantResponse(restaurantResponse),
                     items,
                     new Payment(paymentId)
             );

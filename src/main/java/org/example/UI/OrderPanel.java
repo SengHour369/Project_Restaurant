@@ -39,7 +39,7 @@ public class OrderPanel extends JPanel {
 
     private List<OrderItemRequest> orderItems = new ArrayList<>();
 
-    private User currentUser;
+    private UserResponse currentUser;
     private ServiceOrderImp orderService = new ServiceOrderImp();
     private ServiceMenuItemImp menuService = new ServiceMenuItemImp();
     private ServiceRestaurantImp restaurantService = new ServiceRestaurantImp();
@@ -47,7 +47,7 @@ public class OrderPanel extends JPanel {
     public OrderPanel(UserResponse user) {
         setLayout(null);
 
-        currentUser = new User();
+        currentUser = new UserResponse();
         currentUser.setId(user.getId());
 
         // --- Restaurant ID Input ---

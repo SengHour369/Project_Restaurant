@@ -12,14 +12,15 @@ import java.util.List;
 public class OrderResponse extends BaseEntity {
     private LocalDateTime orderDate;
     private Double totalPrice;
-    private User user;
+    private UserResponse user;
     private RestaurantResponse restaurant;
     private List<OrderItem> orderItems;
     private Payment payment;
 
     public OrderResponse(int id, LocalDateTime orderDate, Double totalPrice,
-                         User user, RestaurantResponse restaurant, List<OrderItem> orderItems,
+                         UserResponse user, RestaurantResponse restaurant, List<OrderItem> orderItems,
                          Payment payment) {
+        this.setId(id);
         this.orderDate = orderDate;
         this.totalPrice = totalPrice;
         this.user = user;
@@ -44,11 +45,11 @@ public class OrderResponse extends BaseEntity {
         this.totalPrice = totalPrice;
     }
 
-    public User getUser() {
+    public UserResponse getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserResponse user) {
         this.user = user;
     }
 
@@ -74,5 +75,17 @@ public class OrderResponse extends BaseEntity {
 
     public void setPayment(Payment payment) {
         this.payment = payment;
+    }
+
+    @Override
+    public String toString() {
+        return "OrderResponse{" +
+                "orderDate=" + orderDate +
+                ", totalPrice=" + totalPrice +
+                ", user=" + user +
+                ", restaurant=" + restaurant +
+                ", orderItems=" + orderItems +
+                ", payment=" + payment +
+                '}';
     }
 }

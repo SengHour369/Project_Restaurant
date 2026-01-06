@@ -27,11 +27,13 @@ public class AdminOrderPanel extends JPanel {
         for(OrderResponse o: list){
             tableModel.addRow(new Object[]{
                     o.getId(),
-                    o.getUser().getId(),
+                    o.getUser().getName(),
                     o.getRestaurant().getName(),
                     o.getTotalPrice(),
-                    o.getPayment().getAmount()
+                    o.getPayment().getId(),
+
             });
+            System.out.println(o.getUser().getId());
         }
     }
 }

@@ -10,6 +10,16 @@ public class UserResponse {
     private String email;
     private String status;
 
+    public UserResponse(UserResponse user) {
+        this.id = user.id;
+        this.name = user.name;
+        this.gender = user.gender;
+    }
+
+    public UserResponse() {
+
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

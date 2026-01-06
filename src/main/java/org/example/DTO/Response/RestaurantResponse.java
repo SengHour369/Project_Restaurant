@@ -27,6 +27,15 @@ public class RestaurantResponse extends BaseEntity {
         this.setId(restaurantId);
     }
 
+    public RestaurantResponse(RestaurantResponse restaurantResponse) {
+        this.setId(restaurantResponse.getId());
+        this.setName(restaurantResponse.getName());
+        this.setCategory(restaurantResponse.getCategory());
+        this.setRating(restaurantResponse.getRating());
+        this.setPhone_number(restaurantResponse.getPhone_number());
+        this.setLocation(restaurantResponse.getLocation());
+    }
+
     public String getName() {
         return name;
     }
