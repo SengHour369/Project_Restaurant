@@ -3,7 +3,6 @@ package org.example.Service.ServiceImplement;
 import org.example.Database.DatabaseConnection;
 import org.example.DTO.Request.MenuItemRequest;
 import org.example.DTO.Response.MenuItemResponse;
-import org.example.Model.Restaurant;
 import org.example.Service.ServiceMenuItem;
 
 import java.sql.*;
@@ -73,12 +72,12 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
     }
 
     @Override
-    public MenuItemResponse getFindByIdMenuItem(MenuItemRequest req) {
+    public MenuItemResponse getFindByIdMenuItem(int req) {
         String sql = "SELECT * FROM menu_items WHERE id=?";
         try(Connection c = DatabaseConnection.getConnection();
             PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, req.getId());
+            ps.setInt(1, req);
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
 

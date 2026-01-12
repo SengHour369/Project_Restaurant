@@ -9,6 +9,6 @@ public interface ServiceMenuItem{
     MenuItemResponse createMenuItem(MenuItemRequest menuItemRequest);
     MenuItemResponse updateMenuItem(MenuItemRequest menuItemRequest);
     void deleteMenuItem(MenuItemRequest menuItemRequest);
-    MenuItemResponse getFindByIdMenuItem(MenuItemRequest menuItemRequest);
+    MenuItemResponse getFindByIdMenuItem(int menuItemRequest);
     List<MenuItemResponse> getAllMenuItems();
 }

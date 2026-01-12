@@ -1,39 +1,46 @@
 package org.example.UI;
 
+
+
 import org.example.DTO.Response.OrderResponse;
 import org.example.Service.ServiceImplement.ServiceOrderImp;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class AdminOrderPanel extends JPanel {
 
-    private ServiceOrderImp serviceOrder = new ServiceOrderImp();
+    private ServiceOrderImp orderService = new ServiceOrderImp();
     private DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"Order ID","User","Restaurant","Total","Payment"},0
+            new String[]{"📦 Order ID", "👤 Customer", "🏢 Restaurant", "💵 Total", "💳 Payment"}, 0
     );
-    private JTable table = new JTable(tableModel);
+    private JTable orderTable = new JTable(tableModel);
 
-    public AdminOrderPanel(){
-        setLayout(null);
-        JScrollPane sp = new JScrollPane(table);
-        sp.setBounds(10,10,800,400); add(sp);
-        loadOrders();
+    public AdminOrderPanel() {
+        setupPanel();
+        loadOrderData();
     }
 
-    private void loadOrders(){
-        tableModel.setRowCount(0);
-        List<OrderResponse> list = serviceOrder.findAllOrders();
-        for(OrderResponse o: list){
-            tableModel.addRow(new Object[]{
-                    o.getId(),
-                    o.getUser().getName(),
-                    o.getRestaurant().getName(),
-                    o.getTotalPrice(),
-                    o.getPayment().getId(),
+    private void setupPanel() {
+        setLayout(null);
+        JScrollPane scrollPane = new JScrollPane(orderTable);
+        scrollPane.setBounds(10, 10, 800, 400);
+        add(scrollPane);
+    }
 
+    private void loadOrderData() {
+        tableModel.setRowCount(0);
+        List<OrderResponse> orders = orderService.findAllOrders();
+
+        for (OrderResponse order : orders) {
+            tableModel.addRow(new Object[]{
+                    order.getId(),
+                    order.getUser().getName(),
+                    order.getRestaurant().getName(),
+                    String.format("$%.2f", order.getTotalPrice()),
+                    order.getPayment().getId()
             });
-            System.out.println(o.getUser().getId());
         }
     }
 }

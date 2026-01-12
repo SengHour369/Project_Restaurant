@@ -32,8 +32,6 @@ public class OrderServiceHandler {
         return true;
     }
 
-
-
     public boolean isUserIdExist(String userId) throws MessageException {
         String sql = "SELECT id FROM users WHERE user_id = ?";
 
@@ -43,17 +41,18 @@ public class OrderServiceHandler {
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
 
-            if (!rs.next()) {
-                JOptionPane.showMessageDialog(null,
-                        "User ID does not exist");
-                throw new MessageException("User ID does not exist");
+            if (rs.next()) {
+              return true;
             }
 
-        } catch (SQLException e) {
-            throw new MessageException("Database error while checking user ID");
-        }
 
-        return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,
+                    "User ID does not exist");
+            throw new MessageException("Database error while checking user ID");
+
+        }
+      return false;
     }
 
 

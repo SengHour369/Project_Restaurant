@@ -3,6 +3,8 @@ package org.example.Service.ServiceImplement;
 import org.example.Database.DatabaseConnection;
 import org.example.DTO.Request.UserRequest;
 import org.example.DTO.Response.UserResponse;
+import org.example.Exception.MessageException;
+import org.example.Service.ServiceHandler.UserServiceHandler;
 import org.example.Service.ServiceUser;
 
 import java.sql.*;
@@ -10,15 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceUserImp implements ServiceUser {
-
+    UserServiceHandler userServiceHandler =  new UserServiceHandler();
     @Override
-    public void create(UserRequest r) {
+    public void create(UserRequest r) throws MessageException {
+
+//        userServiceHandler.usernameExists(r.getName());
+//        userServiceHandler.phone_numberExists(r.getPhone());
+//        userServiceHandler.EmailExists(r.getEmail());
+//        userServiceHandler.HasValidUsername(r.getName());
         String sql = """
             INSERT INTO users
             (name, gender, date_of_birth, phone_number, address, email, password, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
-
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -87,6 +93,7 @@ public class ServiceUserImp implements ServiceUser {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
+
 
             if (rs.next()) return map(rs);
 

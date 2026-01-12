@@ -8,9 +8,8 @@ import org.example.DTO.Response.UserResponse;
 import org.example.Exception.MessageException;
 import org.example.Model.OrderItem;
 import org.example.Model.Payment;
-import org.example.Model.User;
+import org.example.Service.ServiceHandler.OrderServiceHandler;
 import org.example.Service.ServiceOrder;
-import org.example.Service.ServiceUser;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -22,8 +21,13 @@ import static org.example.Database.DatabaseConnection.getConnection;
 public class ServiceOrderImp implements ServiceOrder {
    ServiceUserImp serviceUser = new ServiceUserImp();
    ServiceRestaurantImp  serviceRestaurant = new ServiceRestaurantImp();
+   OrderServiceHandler  orderServiceHandler = new OrderServiceHandler();
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) throws MessageException {
+        orderServiceHandler.hasValidUser(String.valueOf(orderRequest.getUser().getId()));
+        orderServiceHandler.hasValidRestaurant(String.valueOf(orderRequest.getRestaurant().getId()));
+        orderServiceHandler.isUserIdExist(String.valueOf(orderRequest.getUser().getId()));
+        orderServiceHandler.isRestaurantIdExist(String.valueOf(orderRequest.getRestaurant().getId()));
         try (Connection conn = getConnection()) {
 
             conn.setAutoCommit(false);
@@ -42,12 +46,10 @@ public class ServiceOrderImp implements ServiceOrder {
             rsPay.next();
             int paymentId = rsPay.getInt("id");
 
-
             String sqlOrder = """
             INSERT INTO orders(order_date, total_price, user_id, restaurants_id, payment_id)
             VALUES (?,?,?,?,?) RETURNING id
         """;
-
             PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
             psOrder.setTimestamp(1, Timestamp.valueOf(orderRequest.getOrderDate()));
             psOrder.setDouble(2, orderRequest.getTotalPrice());
@@ -198,8 +200,6 @@ public class ServiceOrderImp implements ServiceOrder {
         }
         return list;
     }
-
-
     @Override
     public OrderResponse updateOrder(int orderId, OrderRequest r) {
         return null;
