@@ -13,7 +13,7 @@ public class AdminOrderPanel extends JPanel {
 
     private ServiceOrderImp orderService = new ServiceOrderImp();
     private DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"📦 Order ID", "👤 Customer", "🏢 Restaurant", "💵 Total", "💳 Payment"}, 0
+            new String[]{" Order ID", " Customer", " Restaurant", " Total", " Payment"}, 0
     );
     private JTable orderTable = new JTable(tableModel);
 

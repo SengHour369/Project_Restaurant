@@ -19,7 +19,7 @@ public class MainAppUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JTabbedPane tabPane = new JTabbedPane();
-        tabPane.addTab("🛒 Order", new OrderPanel(user));
+        tabPane.addTab(" Order", new OrderPanel(user));
 
         add(tabPane);
     }

@@ -10,8 +10,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,21 +21,27 @@ public class RestaurantPanel extends JPanel {
     private final JTextField txtId = createTextField(false);
     private final JTextField txtName = createTextField(true);
     private final JComboBox<String> txtCategory = new JComboBox<>(new String[]{
-            "🍕 Italian", "🍣 Japanese", "🍔 American", "🌮 Mexican",
-            "🥘 Chinese", "🍝 Korean", "🍜 Vietnamese", "🥗 Healthy",
-            "☕ Cafe", "🍰 Dessert", "🍺 Pub", "🥩 Steakhouse"
+            "Italian", "Japanese", "American", "Mexican",
+            "Chinese", "Korean", "Vietnamese", "Healthy",
+            "Cafe", "Dessert", "Pub", "Steakhouse"
     });
     private final JSlider txtRating = new JSlider(0, 5, 0);
-    private final JLabel lblRatingValue = new JLabel("⭐ 0/5");
+    private final JLabel lblRatingValue = new JLabel("0/5");
     private final JTextField txtPhone = createTextField(true);
     private final JTextField txtLocation = createTextField(true);
+
+    // Buttons
+    private JButton btnAdd;
+    private JButton btnUpdate;
+    private JButton btnDelete;
+    private JButton btnClear;
 
     // Search field
     private final JTextField txtSearch = new JTextField();
 
     // Table
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"ID", "Name", "Category", "⭐ Rating", "📞 Phone", "📍 Location", "🆔 Internal ID"}, 0
+            new String[]{"ID", "Name", "Category", "Rating", "Phone", "Location", "Internal ID"}, 0
     ) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -53,9 +58,11 @@ public class RestaurantPanel extends JPanel {
     private TableRowSorter<DefaultTableModel> tableSorter;
 
     // Statistics labels
-    private final JLabel lblTotalRestaurants = new JLabel("🏢 Total: 0");
-    private final JLabel lblAvgRating = new JLabel("⭐ Avg Rating: 0.0");
-    private final JLabel lblSelectedInfo = new JLabel("👆 Select a restaurant");
+    private final JLabel lblTotalRestaurants = new JLabel("Total: 0");
+    private final JLabel lblAvgRating = new JLabel("Avg Rating: 0.0");
+    private final JLabel lblSelectedInfo = new JLabel("Select a restaurant");
+
+    private JSplitPane splitPane;
 
     public RestaurantPanel() {
         initializeUI();
@@ -67,15 +74,19 @@ public class RestaurantPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
+        // Make it full screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setPreferredSize(screenSize);
+
         // Top panel with title and search
         JPanel topPanel = createTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
         // Center panel with split view
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(400);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setResizeWeight(0.35);
         splitPane.setContinuousLayout(true);
+        splitPane.setBorder(null);
 
         // Left panel - Form
         JPanel formPanel = createFormPanel();
@@ -90,6 +101,30 @@ public class RestaurantPanel extends JPanel {
         // Bottom panel - Statistics
         JPanel statsPanel = createStatsPanel();
         add(statsPanel, BorderLayout.SOUTH);
+
+        // Add resize listener
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                // Set divider location after component is shown
+                SwingUtilities.invokeLater(() -> {
+                    if (splitPane != null && splitPane.getWidth() > 0) {
+                        splitPane.setDividerLocation(0.35);
+                    }
+                });
+            }
+        });
+    }
+
+    private void resizeComponents() {
+        if (splitPane != null && splitPane.getWidth() > 0) {
+            splitPane.setDividerLocation(0.35);
+        }
     }
 
     private JPanel createTopPanel() {
@@ -97,31 +132,31 @@ public class RestaurantPanel extends JPanel {
         panel.setBackground(Color.decode("#f8f9fa"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#3498db")),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
-        // Title with icon
-        JLabel titleLabel = new JLabel("🏢 Restaurant Management");
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        // Title
+        JLabel titleLabel = new JLabel("Restaurant Management");
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
         titleLabel.setForeground(Color.decode("#2c3e50"));
 
         // Search panel
-        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
+        JPanel searchPanel = new JPanel(new BorderLayout(15, 0));
         searchPanel.setBackground(Color.decode("#f8f9fa"));
 
-        JLabel searchLabel = new JLabel("🔍 Search:");
-        searchLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         searchLabel.setForeground(Color.decode("#2c3e50"));
 
-        txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 16));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#3498db"), 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
+                BorderFactory.createLineBorder(Color.decode("#3498db"), 2),
+                BorderFactory.createEmptyBorder(12, 20, 12, 20)
         ));
-        txtSearch.setPreferredSize(new Dimension(250, 35));
+        txtSearch.setPreferredSize(new Dimension(400, 45));
         txtSearch.setToolTipText("Search by name, category, location...");
 
-        JButton btnClearSearch = createIconButton("🗑️", Color.decode("#e74c3c"), 14);
+        JButton btnClearSearch = createIconButton("Clear", Color.decode("#e74c3c"), 16);
         btnClearSearch.setToolTipText("Clear search");
         btnClearSearch.addActionListener(e -> {
             txtSearch.setText("");
@@ -142,76 +177,85 @@ public class RestaurantPanel extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(null);
         panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
         // Form title
-        JLabel formTitle = new JLabel("➕ Add/Edit Restaurant");
-        formTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
+        JLabel formTitle = new JLabel("Add/Edit Restaurant");
+        formTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
         formTitle.setForeground(Color.decode("#2c3e50"));
-        formTitle.setBounds(20, 20, 350, 30);
+        formTitle.setBounds(20, 20, 400, 40);
         panel.add(formTitle);
 
-        int yPos = 70;
-        int fieldWidth = 320;
+        int yPos = 80;
+        int fieldWidth = 500;
+        int labelWidth = 180;
 
         // Restaurant ID (read-only)
-        addFormField("🆔 Restaurant ID:", txtId, 20, yPos, fieldWidth, panel);
-        yPos += 50;
+        addFormField("Restaurant ID:", txtId, 20, yPos, labelWidth, fieldWidth, panel);
+        yPos += 55;
 
         // Name field
-        addFormField("🏷️ Restaurant Name:", txtName, 20, yPos, fieldWidth, panel);
-        yPos += 50;
+        addFormField("Restaurant Name:", txtName, 20, yPos, labelWidth, fieldWidth, panel);
+        yPos += 55;
 
-        // Category combo with icon
-        JLabel lblCategory = new JLabel("📁 Category:");
-        lblCategory.setBounds(20, yPos, 120, 25);
-        lblCategory.setFont(new Font("SansSerif", Font.BOLD, 14));
+        // Category combo
+        JLabel lblCategory = new JLabel("Category:");
+        lblCategory.setBounds(20, yPos, labelWidth, 35);
+        lblCategory.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblCategory.setForeground(Color.decode("#2c3e50"));
         panel.add(lblCategory);
 
-        txtCategory.setBounds(150, yPos, fieldWidth - 130, 30);
-        txtCategory.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        txtCategory.setBounds(20 + labelWidth + 10, yPos, fieldWidth - labelWidth - 30, 35);
+        txtCategory.setFont(new Font("SansSerif", Font.PLAIN, 16));
         txtCategory.setBackground(Color.WHITE);
         panel.add(txtCategory);
-        yPos += 50;
+        yPos += 55;
 
         // Rating slider
-        JLabel lblRating = new JLabel("⭐ Rating:");
-        lblRating.setBounds(20, yPos, 120, 25);
-        lblRating.setFont(new Font("SansSerif", Font.BOLD, 14));
+        JLabel lblRating = new JLabel("Rating:");
+        lblRating.setBounds(20, yPos, labelWidth, 35);
+        lblRating.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblRating.setForeground(Color.decode("#2c3e50"));
         panel.add(lblRating);
 
-        txtRating.setBounds(150, yPos, 180, 30);
+        txtRating.setBounds(20 + labelWidth + 10, yPos, 200, 35);
         txtRating.setMajorTickSpacing(1);
         txtRating.setPaintTicks(true);
         txtRating.setPaintLabels(true);
         txtRating.setSnapToTicks(true);
+        txtRating.setBackground(Color.WHITE);
         panel.add(txtRating);
 
-        lblRatingValue.setBounds(340, yPos, 60, 25);
-        lblRatingValue.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblRatingValue.setBounds(20 + labelWidth + 10 + 210, yPos, 80, 35);
+        lblRatingValue.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblRatingValue.setForeground(Color.decode("#f39c12"));
         panel.add(lblRatingValue);
-        yPos += 50;
+        yPos += 55;
 
         // Phone field
-        addFormField("📞 Phone Number:", txtPhone, 20, yPos, fieldWidth, panel);
-        yPos += 50;
+        addFormField("Phone Number:", txtPhone, 20, yPos, labelWidth, fieldWidth, panel);
+        yPos += 55;
 
         // Location field
-        addFormField("📍 Location:", txtLocation, 20, yPos, fieldWidth, panel);
-        yPos += 60;
+        addFormField("Location:", txtLocation, 20, yPos, labelWidth, fieldWidth, panel);
+        yPos += 65;
 
         // Buttons panel
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        buttonPanel.setBounds(20, yPos, fieldWidth, 90);
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 15, 15));
+        buttonPanel.setBounds(20, yPos, fieldWidth + 10, 110);
         buttonPanel.setBackground(Color.WHITE);
 
-        JButton btnAdd = createStyledButton("➕ Add", Color.decode("#2ecc71"));
-        JButton btnUpdate = createStyledButton("✏️ Update", Color.decode("#3498db"));
-        JButton btnDelete = createStyledButton("🗑️ Delete", Color.decode("#e74c3c"));
-        JButton btnClear = createStyledButton("🧹 Clear", Color.decode("#95a5a6"));
+        btnAdd = createStyledButton("Add Restaurant", Color.decode("#2ecc71"));
+        btnUpdate = createStyledButton("Update", Color.decode("#3498db"));
+        btnDelete = createStyledButton("Delete", Color.decode("#e74c3c"));
+        btnClear = createStyledButton("Clear", Color.decode("#95a5a6"));
+
+        // Make buttons larger
+        Dimension buttonSize = new Dimension(180, 45);
+        btnAdd.setPreferredSize(buttonSize);
+        btnUpdate.setPreferredSize(buttonSize);
+        btnDelete.setPreferredSize(buttonSize);
+        btnClear.setPreferredSize(buttonSize);
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
@@ -219,24 +263,24 @@ public class RestaurantPanel extends JPanel {
         buttonPanel.add(btnClear);
         panel.add(buttonPanel);
 
-        yPos += 100;
+        yPos += 120;
 
         // Quick actions
-        JLabel quickActions = new JLabel("⚡ Quick Actions:");
-        quickActions.setBounds(20, yPos, 150, 25);
-        quickActions.setFont(new Font("SansSerif", Font.BOLD, 14));
+        JLabel quickActions = new JLabel("Quick Actions:");
+        quickActions.setBounds(20, yPos, 150, 30);
+        quickActions.setFont(new Font("SansSerif", Font.BOLD, 16));
         quickActions.setForeground(Color.decode("#2c3e50"));
         panel.add(quickActions);
 
         JPanel quickButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        quickButtons.setBounds(150, yPos, fieldWidth - 130, 30);
+        quickButtons.setBounds(180, yPos, fieldWidth - 160, 35);
         quickButtons.setBackground(Color.WHITE);
 
-        JButton btnRefresh = createIconButton("🔄", Color.decode("#9b59b6"), 12);
+        JButton btnRefresh = createIconButton("Refresh", Color.decode("#9b59b6"), 14);
         btnRefresh.setToolTipText("Refresh List");
-        JButton btnViewDetails = createIconButton("👁️", Color.decode("#1abc9c"), 12);
+        JButton btnViewDetails = createIconButton("Details", Color.decode("#1abc9c"), 14);
         btnViewDetails.setToolTipText("View Details");
-        JButton btnCopyPhone = createIconButton("📋", Color.decode("#f39c12"), 12);
+        JButton btnCopyPhone = createIconButton("Copy Phone", Color.decode("#f39c12"), 14);
         btnCopyPhone.setToolTipText("Copy Phone");
 
         btnRefresh.addActionListener(e -> refreshRestaurants());
@@ -248,35 +292,51 @@ public class RestaurantPanel extends JPanel {
         quickButtons.add(btnCopyPhone);
         panel.add(quickButtons);
 
+        yPos += 50;
+
+        // Tips
+        JLabel tipsLabel = new JLabel("<html><div style='text-align: center;'>Tips:<br>" +
+                "• Double-click row to edit<br>" +
+                "• Click category to filter<br>" +
+                "• Use Ctrl+F to search<br>" +
+                "• Press Enter to navigate fields</div></html>");
+        tipsLabel.setBounds(20, yPos, fieldWidth + 10, 80);
+        tipsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
+        tipsLabel.setForeground(Color.decode("#7f8c8d"));
+        tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(tipsLabel);
+
         return panel;
     }
 
     private JPanel createTablePanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
         panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 30));
 
         // Table header
         JPanel tableHeader = new JPanel(new BorderLayout());
         tableHeader.setBackground(Color.WHITE);
-        tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        JLabel tableTitle = new JLabel("📋 Restaurants List");
-        tableTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
+        JLabel tableTitle = new JLabel("Restaurants List");
+        tableTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
         tableTitle.setForeground(Color.decode("#2c3e50"));
 
-        lblSelectedInfo.setFont(new Font("SansSerif", Font.ITALIC, 12));
+        lblSelectedInfo.setFont(new Font("SansSerif", Font.ITALIC, 14));
         lblSelectedInfo.setForeground(Color.decode("#7f8c8d"));
 
         tableHeader.add(tableTitle, BorderLayout.WEST);
         tableHeader.add(lblSelectedInfo, BorderLayout.EAST);
 
         // Configure table
-        restaurantTable.setRowHeight(40);
-        restaurantTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        restaurantTable.setRowHeight(45);
+        restaurantTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
         restaurantTable.getTableHeader().setBackground(Color.decode("#34495e"));
         restaurantTable.getTableHeader().setForeground(Color.WHITE);
+        restaurantTable.getTableHeader().setPreferredSize(new Dimension(0, 50));
         restaurantTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        restaurantTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // Hide internal ID column
         restaurantTable.removeColumn(restaurantTable.getColumnModel().getColumn(6));
@@ -298,15 +358,15 @@ public class RestaurantPanel extends JPanel {
                     } else {
                         c.setBackground(new Color(240, 248, 255));
                     }
+                } else {
+                    c.setBackground(new Color(220, 240, 255));
+                    c.setForeground(Color.BLACK);
                 }
 
                 // Style rating column
                 if (column == 3 && value != null) {
-                    String ratingText = value.toString();
-                    if (ratingText.contains("★")) {
-                        setForeground(Color.decode("#f39c12")); // Orange for stars
-                        setFont(getFont().deriveFont(Font.BOLD));
-                    }
+                    setForeground(Color.decode("#f39c12")); // Orange for rating
+                    setFont(getFont().deriveFont(Font.BOLD));
                 }
 
                 // Center align ID column
@@ -314,12 +374,15 @@ public class RestaurantPanel extends JPanel {
                     setHorizontalAlignment(SwingConstants.CENTER);
                 }
 
+                // Add padding
+                setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
                 return c;
             }
         });
 
         JScrollPane scrollPane = new JScrollPane(restaurantTable);
-        scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
         scrollPane.getViewport().setBackground(Color.WHITE);
 
         panel.add(tableHeader, BorderLayout.NORTH);
@@ -329,27 +392,21 @@ public class RestaurantPanel extends JPanel {
     }
 
     private JPanel createStatsPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
         panel.setBackground(Color.decode("#f1f8ff"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#3498db")),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                BorderFactory.createEmptyBorder(15, 30, 15, 30)
         ));
 
-        lblTotalRestaurants.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblTotalRestaurants.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblTotalRestaurants.setForeground(Color.decode("#2c3e50"));
 
-        lblAvgRating.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblAvgRating.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblAvgRating.setForeground(Color.decode("#f39c12"));
-
-        JLabel lblActions = new JLabel("💡 Double-click row to edit | Click category to filter");
-        lblActions.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        lblActions.setForeground(Color.decode("#7f8c8d"));
 
         panel.add(lblTotalRestaurants);
         panel.add(lblAvgRating);
-        panel.add(Box.createHorizontalStrut(50));
-        panel.add(lblActions);
 
         return panel;
     }
@@ -365,9 +422,15 @@ public class RestaurantPanel extends JPanel {
         // Rating slider listener
         txtRating.addChangeListener(e -> {
             int rating = txtRating.getValue();
-            lblRatingValue.setText("⭐ " + rating + "/5");
+            lblRatingValue.setText(rating + "/5");
             lblRatingValue.setForeground(getRatingColor(rating));
         });
+
+        // Button actions
+        btnAdd.addActionListener(e -> addRestaurant());
+        btnUpdate.addActionListener(e -> updateRestaurant());
+        btnDelete.addActionListener(e -> deleteRestaurant());
+        btnClear.addActionListener(e -> clearForm());
 
         // Table selection listener
         restaurantTable.getSelectionModel().addListSelectionListener(e -> {
@@ -406,52 +469,17 @@ public class RestaurantPanel extends JPanel {
             }
         });
 
-        // Setup button actions (will be set by external controller)
-        // For now, we'll add them here for completeness
-        setupButtonActions();
-
         // Keyboard shortcuts
         setupKeyboardShortcuts();
-    }
-
-    private void setupButtonActions() {
-        // Find buttons and add action listeners
-        Component[] components = getComponents();
-        for (Component comp : components) {
-            if (comp instanceof JPanel) {
-                setupPanelButtons((JPanel) comp);
-            }
-        }
-    }
-
-    private void setupPanelButtons(JPanel panel) {
-        for (Component comp : panel.getComponents()) {
-            if (comp instanceof JButton) {
-                JButton btn = (JButton) comp;
-                String text = btn.getText();
-
-                if (text.contains("Add")) {
-                    btn.addActionListener(e -> addRestaurant());
-                } else if (text.contains("Update")) {
-                    btn.addActionListener(e -> updateRestaurant());
-                } else if (text.contains("Delete")) {
-                    btn.addActionListener(e -> deleteRestaurant());
-                } else if (text.contains("Clear")) {
-                    btn.addActionListener(e -> clearForm());
-                }
-            } else if (comp instanceof JPanel) {
-                setupPanelButtons((JPanel) comp);
-            }
-        }
     }
 
     private void setupKeyboardShortcuts() {
         // Ctrl+F to focus search
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke("control F"), "focusSearch");
-        getActionMap().put("focusSearch", new javax.swing.AbstractAction() {
+        getActionMap().put("focusSearch", new AbstractAction() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 txtSearch.requestFocus();
                 txtSearch.selectAll();
             }
@@ -460,9 +488,9 @@ public class RestaurantPanel extends JPanel {
         // Delete key to delete selected restaurant
         restaurantTable.getInputMap(JComponent.WHEN_FOCUSED).put(
                 KeyStroke.getKeyStroke("DELETE"), "deleteRestaurant");
-        restaurantTable.getActionMap().put("deleteRestaurant", new javax.swing.AbstractAction() {
+        restaurantTable.getActionMap().put("deleteRestaurant", new AbstractAction() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 deleteRestaurant();
             }
         });
@@ -470,9 +498,9 @@ public class RestaurantPanel extends JPanel {
         // F5 to refresh
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke("F5"), "refresh");
-        getActionMap().put("refresh", new javax.swing.AbstractAction() {
+        getActionMap().put("refresh", new AbstractAction() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 refreshRestaurants();
             }
         });
@@ -480,12 +508,21 @@ public class RestaurantPanel extends JPanel {
         // Ctrl+N for new restaurant
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke("control N"), "newRestaurant");
-        getActionMap().put("newRestaurant", new javax.swing.AbstractAction() {
+        getActionMap().put("newRestaurant", new AbstractAction() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 clearForm();
                 txtName.requestFocus();
             }
+        });
+
+        // Enter key navigation
+        txtName.addActionListener(e -> txtCategory.requestFocus());
+        txtCategory.addActionListener(e -> txtRating.requestFocus());
+        txtPhone.addActionListener(e -> txtLocation.requestFocus());
+        txtLocation.addActionListener(e -> {
+            if (txtId.getText().isEmpty()) addRestaurant();
+            else updateRestaurant();
         });
     }
 
@@ -514,19 +551,21 @@ public class RestaurantPanel extends JPanel {
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this,
                     "Please select a restaurant first!",
-                    "⚠️ No Selection", JOptionPane.WARNING_MESSAGE);
+                    "No Selection", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int modelRow = restaurantTable.convertRowIndexToModel(selectedRow);
         String details = String.format(
-                "🏢 Restaurant Details\n\n" +
-                        "🆔 ID: %s\n" +
-                        "🏷️ Name: %s\n" +
-                        "📁 Category: %s\n" +
-                        "⭐ Rating: %s\n" +
-                        "📞 Phone: %s\n" +
-                        "📍 Location: %s",
+                "<html><div style='font-size:12pt;'>" +
+                        "<b>Restaurant Details</b><br><br>" +
+                        "ID: %s<br>" +
+                        "Name: %s<br>" +
+                        "Category: %s<br>" +
+                        "Rating: %s<br>" +
+                        "Phone: %s<br>" +
+                        "Location: %s" +
+                        "</div></html>",
                 tableModel.getValueAt(modelRow, 0),
                 tableModel.getValueAt(modelRow, 1),
                 tableModel.getValueAt(modelRow, 2),
@@ -536,58 +575,77 @@ public class RestaurantPanel extends JPanel {
         );
 
         JOptionPane.showMessageDialog(this, details,
-                "📋 Restaurant Details", JOptionPane.INFORMATION_MESSAGE);
+                "Restaurant Details", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void copyToClipboard(String text) {
-        if (text == null || text.trim().isEmpty()) return;
+        if (text == null || text.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "No text to copy!", "Empty",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         java.awt.datatransfer.StringSelection selection = new java.awt.datatransfer.StringSelection(text);
         java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(selection, selection);
 
         JOptionPane.showMessageDialog(this,
-                "✅ Copied to clipboard: " + text,
-                "📋 Copied", JOptionPane.INFORMATION_MESSAGE);
+                "Copied to clipboard: " + text,
+                "Copied", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void addRestaurant() {
         try {
+            // Validate required fields
             if (txtName.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter restaurant name!", "⚠️ Missing Information",
-                        JOptionPane.WARNING_MESSAGE);
-                txtName.requestFocus();
+                showValidationError("Please enter restaurant name!", txtName);
+                return;
+            }
+
+            if (txtLocation.getText().trim().isEmpty()) {
+                showValidationError("Please enter restaurant location!", txtLocation);
                 return;
             }
 
             RestaurantRequest request = collectFormData();
             restaurantService.CreateRestaurant(request);
             JOptionPane.showMessageDialog(this,
-                    "✅ Restaurant added successfully!\n\n" +
-                            "🏷️ Name: " + request.getName() + "\n" +
-                            "📁 Category: " + request.getCategory() + "\n" +
-                            "⭐ Rating: " + request.getRating() + "/5",
-                    "🎉 Success", JOptionPane.INFORMATION_MESSAGE);
+                    "<html><div style='font-size:12pt;'>" +
+                            "<b>Restaurant added successfully!</b><br><br>" +
+                            "Name: " + request.getName() + "<br>" +
+                            "Category: " + request.getCategory() + "<br>" +
+                            "Rating: " + request.getRating() + "/5" +
+                            "</div></html>",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
             loadAllRestaurants();
             clearForm();
             txtName.requestFocus();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showValidationError(String message, JComponent field) {
+        JOptionPane.showMessageDialog(this, message, "Validation Error", JOptionPane.WARNING_MESSAGE);
+        field.requestFocus();
+        if (field instanceof JTextField) {
+            ((JTextField) field).selectAll();
         }
     }
 
     public void updateRestaurant() {
         if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Please select a restaurant to update", "⚠️ No Selection",
+                    "Please select a restaurant to update", "No Selection",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Update this restaurant's information?", "✏️ Confirm Update",
+                "<html><div style='font-size:12pt;'>Update this restaurant's information?</div></html>",
+                "Confirm Update",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
@@ -596,12 +654,12 @@ public class RestaurantPanel extends JPanel {
                 RestaurantRequest request = collectFormData();
                 restaurantService.updateRestaurant(request, id);
                 JOptionPane.showMessageDialog(this,
-                        "✅ Restaurant updated successfully!", "Success",
+                        "Restaurant updated successfully!", "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                 loadAllRestaurants();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                        "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -609,30 +667,36 @@ public class RestaurantPanel extends JPanel {
     public void deleteRestaurant() {
         if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Please select a restaurant to delete", "⚠️ No Selection",
+                    "Please select a restaurant to delete", "No Selection",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        int id = Integer.parseInt(txtId.getText());
+
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete this restaurant?\n" +
-                        "This action cannot be undone!\n\n" +
-                        "⚠️ All menu items from this restaurant will also be deleted.",
-                "🗑️ Confirm Delete",
+                "<html><div style='font-size:12pt;'>" +
+                        "<b>Are you sure you want to delete this restaurant?</b><br>" +
+                        "This action cannot be undone!<br><br>" +
+                        "All menu items from this restaurant will also be deleted.<br><br>" +
+                        "<b>Restaurant Details:</b><br>" +
+                        "Name: " + txtName.getText() + "<br>" +
+                        "Category: " + txtCategory.getSelectedItem() +
+                        "</div></html>",
+                "Confirm Delete",
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                int id = Integer.parseInt(txtId.getText());
                 restaurantService.deleteRestaurant(id);
                 JOptionPane.showMessageDialog(this,
-                        "✅ Restaurant deleted successfully!", "Success",
+                        "Restaurant deleted successfully!", "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                 loadAllRestaurants();
                 clearForm();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                        "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -642,15 +706,12 @@ public class RestaurantPanel extends JPanel {
         clearForm();
         txtSearch.setText("");
         JOptionPane.showMessageDialog(this,
-                "🔄 Restaurant list refreshed!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                "Restaurant list refreshed!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private RestaurantRequest collectFormData() {
         String category = (String) txtCategory.getSelectedItem();
-        // Remove emoji if present
-        if (category != null && category.contains(" ")) {
-            category = category.substring(category.indexOf(" ") + 1);
-        }
+        // No emoji removal needed
 
         return new RestaurantRequest(
                 txtName.getText().trim(),
@@ -670,13 +731,12 @@ public class RestaurantPanel extends JPanel {
             int ratedRestaurants = 0;
 
             for (RestaurantResponse restaurant : restaurants) {
-                String ratingDisplay = getStarRating(restaurant.getRating());
                 tableModel.addRow(new Object[]{
                         restaurant.getId(),
                         restaurant.getName(),
                         restaurant.getCategory(),
-                        ratingDisplay + " (" + restaurant.getRating() + "/5)",
-                        formatPhone(restaurant.getPhone_number()),
+                        restaurant.getRating() + "/5",
+                        restaurant.getPhone_number() != null ? restaurant.getPhone_number() : "N/A",
                         restaurant.getLocation(),
                         restaurant.getId() // Hidden column for reference
                 });
@@ -688,29 +748,18 @@ public class RestaurantPanel extends JPanel {
             }
 
             // Update statistics
-            lblTotalRestaurants.setText("🏢 Total: " + restaurants.size());
+            lblTotalRestaurants.setText("Total: " + restaurants.size());
 
             double avgRating = ratedRestaurants > 0 ? (double) totalRating / ratedRestaurants : 0;
-            lblAvgRating.setText(String.format("⭐ Avg Rating: %.1f/5", avgRating));
+            lblAvgRating.setText(String.format("Avg Rating: %.1f/5", avgRating));
             lblAvgRating.setForeground(getRatingColor((int) Math.round(avgRating)));
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error loading restaurants: " + ex.getMessage(),
+                    "Error loading restaurants: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace(); // For debugging
         }
-    }
-
-    private String getStarRating(int rating) {
-        StringBuilder stars = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            if (i < rating) {
-                stars.append("★");
-            } else {
-                stars.append("☆");
-            }
-        }
-        return stars.toString();
     }
 
     private Color getRatingColor(int rating) {
@@ -724,19 +773,6 @@ public class RestaurantPanel extends JPanel {
         }
     }
 
-    private String formatPhone(String phone) {
-        if (phone == null || phone.trim().isEmpty()) return "N/A";
-        // Simple formatting: (123) 456-7890
-        phone = phone.replaceAll("[^\\d]", "");
-        if (phone.length() == 10) {
-            return String.format("(%s) %s-%s",
-                    phone.substring(0, 3),
-                    phone.substring(3, 6),
-                    phone.substring(6));
-        }
-        return phone;
-    }
-
     private void fillFormFromSelectedRow() {
         int selectedRow = restaurantTable.getSelectedRow();
         if (selectedRow == -1) return;
@@ -746,41 +782,46 @@ public class RestaurantPanel extends JPanel {
         txtId.setText(tableModel.getValueAt(modelRow, 0).toString());
         txtName.setText(tableModel.getValueAt(modelRow, 1).toString());
 
-        // Set category (add emoji back if needed)
+        // Set category
         String category = tableModel.getValueAt(modelRow, 2).toString();
+        boolean found = false;
         for (int i = 0; i < txtCategory.getItemCount(); i++) {
             String item = txtCategory.getItemAt(i);
-            if (item.contains(category)) {
+            if (item.equals(category)) {
                 txtCategory.setSelectedIndex(i);
+                found = true;
                 break;
             }
         }
 
-        // Extract rating from display string like "★★★☆☆ (3/5)"
+        // If category not found, add it
+        if (!found && !category.isEmpty()) {
+            txtCategory.addItem(category);
+            txtCategory.setSelectedItem(category);
+        }
+
+        // Extract rating from display string like "3/5"
         String ratingDisplay = tableModel.getValueAt(modelRow, 3).toString();
-        if (ratingDisplay.contains("(")) {
-            String ratingStr = ratingDisplay.substring(
-                    ratingDisplay.indexOf("(") + 1,
-                    ratingDisplay.indexOf("/")
-            ).trim();
+        if (ratingDisplay.contains("/")) {
+            String ratingStr = ratingDisplay.substring(0, ratingDisplay.indexOf("/")).trim();
             try {
                 int rating = Integer.parseInt(ratingStr);
                 txtRating.setValue(rating);
-                lblRatingValue.setText("⭐ " + rating + "/5");
+                lblRatingValue.setText(rating + "/5");
                 lblRatingValue.setForeground(getRatingColor(rating));
             } catch (NumberFormatException e) {
                 txtRating.setValue(0);
             }
         }
 
-        // Phone (remove formatting)
+        // Phone (remove formatting if any)
         String phone = tableModel.getValueAt(modelRow, 4).toString();
-        txtPhone.setText(phone.equals("N/A") ? "" : phone.replaceAll("[^\\d]", ""));
+        txtPhone.setText(phone.equals("N/A") ? "" : phone);
 
         txtLocation.setText(tableModel.getValueAt(modelRow, 5).toString());
 
         // Update selected info label
-        lblSelectedInfo.setText("✅ Selected: " + txtName.getText());
+        lblSelectedInfo.setText("Selected: " + txtName.getText());
     }
 
     private void clearForm() {
@@ -790,30 +831,31 @@ public class RestaurantPanel extends JPanel {
         txtRating.setValue(0);
         txtPhone.setText("");
         txtLocation.setText("");
-        lblSelectedInfo.setText("👆 Select a restaurant");
+        lblSelectedInfo.setText("Select a restaurant");
         restaurantTable.clearSelection();
+        tableSorter.setRowFilter(null);
     }
 
     // UI Helper methods
     private JTextField createTextField(boolean editable) {
         JTextField field = new JTextField();
         field.setEditable(editable);
-        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setFont(new Font("SansSerif", Font.PLAIN, 16));
         return field;
     }
 
-    private void addFormField(String label, JTextField field, int x, int y, int width, JPanel panel) {
+    private void addFormField(String label, JTextField field, int x, int y, int labelWidth, int fieldWidth, JPanel panel) {
         JLabel lbl = new JLabel(label);
-        lbl.setBounds(x, y, 130, 25);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lbl.setBounds(x, y, labelWidth, 35);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
         lbl.setForeground(Color.decode("#2c3e50"));
         panel.add(lbl);
 
-        field.setBounds(x + 140, y, width - 140, 30);
-        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
+        field.setFont(new Font("SansSerif", Font.PLAIN, 16));
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
         panel.add(field);
     }
@@ -822,10 +864,10 @@ public class RestaurantPanel extends JPanel {
         JButton button = new JButton(text);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
+                BorderFactory.createLineBorder(color.darker(), 2),
+                BorderFactory.createEmptyBorder(12, 25, 12, 25)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -843,14 +885,14 @@ public class RestaurantPanel extends JPanel {
         return button;
     }
 
-    private JButton createIconButton(String icon, Color color, int fontSize) {
-        JButton button = new JButton(icon);
+    private JButton createIconButton(String text, Color color, int fontSize) {
+        JButton button = new JButton(text);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("Segoe UI Emoji", Font.PLAIN, fontSize));
+        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
         button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                BorderFactory.createLineBorder(color.darker(), 2),
+                BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));

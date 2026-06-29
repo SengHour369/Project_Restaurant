@@ -22,7 +22,7 @@ public class MenuItemPanel extends JPanel {
     private final ServiceRestaurantImp restaurantService = new ServiceRestaurantImp();
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"ID", "🍽️ Item Name", "💰 Price", "🏢 Restaurant", "📍 Restaurant ID"}, 0
+            new String[]{"ID", "Item Name", "Price", "Restaurant", "Restaurant ID"}, 0
     ) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -45,7 +45,7 @@ public class MenuItemPanel extends JPanel {
 
     // Search components
     private final JTextField txtSearch = new JTextField();
-    private final JButton btnSearch = new JButton("🔍");
+    private final JButton btnSearch = new JButton("Search");
 
     // Buttons
     private JButton btnAdd;
@@ -95,7 +95,7 @@ public class MenuItemPanel extends JPanel {
         ));
 
         // Title
-        JLabel titleLabel = new JLabel("📋 Menu Management");
+        JLabel titleLabel = new JLabel("Menu Management");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         titleLabel.setForeground(Color.decode("#2c3e50"));
 
@@ -132,7 +132,7 @@ public class MenuItemPanel extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel titleLabel = new JLabel("➕ Add/Edit Menu Item");
+        JLabel titleLabel = new JLabel("Add/Edit Menu Item");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         titleLabel.setForeground(Color.decode("#2c3e50"));
         titleLabel.setBounds(20, 20, 350, 30);
@@ -145,7 +145,7 @@ public class MenuItemPanel extends JPanel {
         yPos += 50;
 
         // Restaurant selection with auto-fill info
-        JLabel lblRestaurant = new JLabel("🏢 Restaurant:");
+        JLabel lblRestaurant = new JLabel("Restaurant:");
         lblRestaurant.setBounds(20, yPos, 100, 25);
         lblRestaurant.setFont(new Font("SansSerif", Font.BOLD, 14));
         lblRestaurant.setForeground(Color.decode("#2c3e50"));
@@ -157,7 +157,7 @@ public class MenuItemPanel extends JPanel {
         panel.add(restaurantCombo);
 
         // Restaurant info display
-        JLabel lblRestaurantInfo = new JLabel("ℹ️ Select a restaurant or click one in the table");
+        JLabel lblRestaurantInfo = new JLabel("Select a restaurant or click one in the table");
         lblRestaurantInfo.setBounds(20, yPos + 35, 330, 20);
         lblRestaurantInfo.setFont(new Font("SansSerif", Font.ITALIC, 11));
         lblRestaurantInfo.setForeground(Color.GRAY);
@@ -166,11 +166,11 @@ public class MenuItemPanel extends JPanel {
         yPos += 70;
 
         // Buttons
-        btnAdd = createStyledButton("➕ Add Item", Color.decode("#4CAF50"));
-        btnUpdate = createStyledButton("✏️ Update", Color.decode("#2196F3"));
-        btnDelete = createStyledButton("🗑️ Delete", Color.decode("#F44336"));
-        btnClear = createStyledButton("🧹 Clear", Color.decode("#9E9E9E"));
-        btnRefresh = createStyledButton("🔄 Refresh", Color.decode("#FF9800"));
+        btnAdd = createStyledButton("Add Item", Color.decode("#4CAF50"));
+        btnUpdate = createStyledButton("Update", Color.decode("#2196F3"));
+        btnDelete = createStyledButton("Delete", Color.decode("#F44336"));
+        btnClear = createStyledButton("Clear", Color.decode("#9E9E9E"));
+        btnRefresh = createStyledButton("Refresh", Color.decode("#FF9800"));
 
         btnAdd.setBounds(20, yPos, 160, 35);
         btnUpdate.setBounds(190, yPos, 160, 35);
@@ -245,7 +245,7 @@ public class MenuItemPanel extends JPanel {
         JPanel tableHeader = new JPanel(new BorderLayout());
         tableHeader.setBackground(Color.WHITE);
 
-        JLabel tableTitle = new JLabel("📋 Menu Items List");
+        JLabel tableTitle = new JLabel("Menu Items List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
         tableTitle.setForeground(Color.decode("#2c3e50"));
 
@@ -272,7 +272,7 @@ public class MenuItemPanel extends JPanel {
         btnRefresh.addActionListener(e -> {
             loadMenuItems();
             loadRestaurants();
-            JOptionPane.showMessageDialog(this, "✅ Menu refreshed!",
+            JOptionPane.showMessageDialog(this, "Menu refreshed!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
         });
 
@@ -324,7 +324,7 @@ public class MenuItemPanel extends JPanel {
 
                             // Show confirmation
                             JOptionPane.showMessageDialog(MenuItemPanel.this,
-                                    String.format("✅ Restaurant auto-filled:\n%s", restaurantName),
+                                    String.format("Restaurant auto-filled:\n%s", restaurantName),
                                     "Auto-Fill", JOptionPane.INFORMATION_MESSAGE);
                             break;
                         }
@@ -404,7 +404,7 @@ public class MenuItemPanel extends JPanel {
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error loading restaurants: " + ex.getMessage(),
+                    "Error loading restaurants: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -430,7 +430,7 @@ public class MenuItemPanel extends JPanel {
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error loading menu items: " + ex.getMessage(),
+                    "Error loading menu items: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -490,14 +490,14 @@ public class MenuItemPanel extends JPanel {
             RestaurantResponse selectedRestaurant = (RestaurantResponse) restaurantCombo.getSelectedItem();
             if (selectedRestaurant == null) {
                 JOptionPane.showMessageDialog(this,
-                        "Please select a restaurant", "⚠️ Missing Information",
+                        "Please select a restaurant", "Missing Information",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (txtName.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                        "Please enter item name", "⚠️ Missing Information",
+                        "Please enter item name", "Missing Information",
                         JOptionPane.WARNING_MESSAGE);
                 txtName.requestFocus();
                 return;
@@ -505,7 +505,7 @@ public class MenuItemPanel extends JPanel {
 
             if (txtPrice.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                        "Please enter price", "⚠️ Missing Information",
+                        "Please enter price", "Missing Information",
                         JOptionPane.WARNING_MESSAGE);
                 txtPrice.requestFocus();
                 return;
@@ -519,7 +519,7 @@ public class MenuItemPanel extends JPanel {
 
             menuService.createMenuItem(request);
             JOptionPane.showMessageDialog(this,
-                    "✅ Menu item added successfully!", "Success",
+                    "Menu item added successfully!", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
             loadMenuItems();
             clearForm();
@@ -527,7 +527,7 @@ public class MenuItemPanel extends JPanel {
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -535,7 +535,7 @@ public class MenuItemPanel extends JPanel {
         int selectedRow = menuTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this,
-                    "Please select a menu item to update", "⚠️ No Selection",
+                    "Please select a menu item to update", "No Selection",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -544,7 +544,7 @@ public class MenuItemPanel extends JPanel {
             RestaurantResponse selectedRestaurant = (RestaurantResponse) restaurantCombo.getSelectedItem();
             if (selectedRestaurant == null) {
                 JOptionPane.showMessageDialog(this,
-                        "Please select a restaurant", "⚠️ Missing Information",
+                        "Please select a restaurant", "Missing Information",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -559,14 +559,14 @@ public class MenuItemPanel extends JPanel {
 
             menuService.updateMenuItem(request);
             JOptionPane.showMessageDialog(this,
-                    "✅ Menu item updated successfully!", "Success",
+                    "Menu item updated successfully!", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
             loadMenuItems();
             clearForm();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -574,14 +574,14 @@ public class MenuItemPanel extends JPanel {
         int selectedRow = menuTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this,
-                    "Please select a menu item to delete", "⚠️ No Selection",
+                    "Please select a menu item to delete", "No Selection",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to delete this menu item?\nThis action cannot be undone!",
-                "⚠️ Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
@@ -591,14 +591,14 @@ public class MenuItemPanel extends JPanel {
 
                 menuService.deleteMenuItem(request);
                 JOptionPane.showMessageDialog(this,
-                        "✅ Menu item deleted successfully!", "Success",
+                        "Menu item deleted successfully!", "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                 loadMenuItems();
                 clearForm();
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                        "❌ Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -673,7 +673,7 @@ public class MenuItemPanel extends JPanel {
 
             if (value instanceof RestaurantResponse) {
                 RestaurantResponse restaurant = (RestaurantResponse) value;
-                setText(String.format("🏢 %s (ID: %d)",
+                setText(String.format("%s (ID: %d)",
                         restaurant.getName(), restaurant.getId()));
             }
 

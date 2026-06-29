@@ -18,8 +18,8 @@ public class OrderHistoryPanel extends JPanel {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     // UI Components
-    private final JLabel lblTotalOrders = new JLabel("📊 Total Orders: 0");
-    private final JLabel lblTotalSpent = new JLabel("💰 Total Spent: $0.00");
+    private final JLabel lblTotalOrders = new JLabel("Total Orders: 0");
+    private final JLabel lblTotalSpent = new JLabel("Total Spent: $0.00");
     private final JComboBox<String> filterCombo = new JComboBox<>(new String[]{
             "All Orders", "Last 7 Days", "Last 30 Days", "This Month", "High Value (>$50)", "Low Value (<$20)"
     });
@@ -27,9 +27,9 @@ public class OrderHistoryPanel extends JPanel {
     public OrderHistoryPanel(UserResponse user) {
         this.currentUser = user;
 
-        // Create table model with emoji icons in headers
+        // Create table model without emoji icons in headers
         tableModel = new DefaultTableModel(
-                new String[]{"📦 Order ID", "📅 Date", "🏢 Restaurant", "🍽️ Items", "💰 Total", "✅ Status"}, 0
+                new String[]{"Order ID", "Date", "Restaurant", "Items", "Total", "Status"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -68,7 +68,7 @@ public class OrderHistoryPanel extends JPanel {
         ));
 
         // Title
-        JLabel titleLabel = new JLabel("📜 Your Order History");
+        JLabel titleLabel = new JLabel("Your Order History");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setForeground(Color.decode("#2c3e50"));
 
@@ -76,14 +76,14 @@ public class OrderHistoryPanel extends JPanel {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterPanel.setBackground(Color.decode("#f8f9fa"));
 
-        JLabel filterLabel = new JLabel("🔍 Filter:");
+        JLabel filterLabel = new JLabel("Filter:");
         filterLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         filterCombo.setFont(new Font("SansSerif", Font.PLAIN, 14));
         filterCombo.setBackground(Color.WHITE);
         filterCombo.addActionListener(e -> filterOrders());
 
-        JButton btnRefresh = createStyledButton("🔄 Refresh", Color.decode("#3498db"), 14);
+        JButton btnRefresh = createStyledButton("Refresh", Color.decode("#3498db"), 14);
         btnRefresh.addActionListener(e -> loadOrderHistory());
 
         filterPanel.add(filterLabel);
@@ -144,7 +144,7 @@ public class OrderHistoryPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
         // Empty state label
-        JLabel emptyLabel = new JLabel("📭 No orders found. Start ordering!", SwingConstants.CENTER);
+        JLabel emptyLabel = new JLabel("No orders found. Start ordering!", SwingConstants.CENTER);
         emptyLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
         emptyLabel.setForeground(Color.GRAY);
 
@@ -188,7 +188,7 @@ public class OrderHistoryPanel extends JPanel {
         lblTotalSpent.setForeground(Color.decode("#27ae60"));
 
         // Average order value
-        JLabel lblAvgOrder = new JLabel("📈 Average Order: $0.00");
+        JLabel lblAvgOrder = new JLabel("Average Order: $0.00");
         lblAvgOrder.setFont(new Font("SansSerif", Font.PLAIN, 14));
         lblAvgOrder.setForeground(Color.decode("#7f8c8d"));
 
@@ -230,8 +230,8 @@ public class OrderHistoryPanel extends JPanel {
                     ? order.getRestaurant().getName()
                     : "Unknown Restaurant";
 
-            // Determine status with emoji
-            String status = getOrderStatusEmoji(order);
+            // Determine status without emoji
+            String status = getOrderStatus(order);
 
             tableModel.addRow(new Object[]{
                     String.format("#%04d", order.getId()), // Format as #0001, #0002, etc.
@@ -248,13 +248,13 @@ public class OrderHistoryPanel extends JPanel {
         updateStatistics(userOrders.size(), totalSpent);
     }
 
-    private String getOrderStatusEmoji(OrderResponse order) {
+    private String getOrderStatus(OrderResponse order) {
         // This is a simplified version - you might have actual status fields
         // Add your own logic based on your OrderResponse model
         if (order.getPayment() != null) {
-            return "✅ Paid";
+            return "Paid";
         }
-        return "⏳ Processing";
+        return "Processing";
     }
 
     private void filterOrders() {
@@ -266,8 +266,8 @@ public class OrderHistoryPanel extends JPanel {
     }
 
     private void updateStatistics(int totalOrders, double totalSpent) {
-        lblTotalOrders.setText("📊 Total Orders: " + totalOrders);
-        lblTotalSpent.setText("💰 Total Spent: $" + String.format("%.2f", totalSpent));
+        lblTotalOrders.setText("Total Orders: " + totalOrders);
+        lblTotalSpent.setText("Total Spent: $" + String.format("%.2f", totalSpent));
 
         // You could add more statistics here
     }
@@ -281,7 +281,7 @@ public class OrderHistoryPanel extends JPanel {
 
         // Create a detailed view dialog
         JDialog detailDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
-                "📋 Order Details", true);
+                "Order Details", true);
         detailDialog.setLayout(new BorderLayout());
         detailDialog.setSize(500, 400);
         detailDialog.setLocationRelativeTo(this);
@@ -302,28 +302,28 @@ public class OrderHistoryPanel extends JPanel {
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         contentPanel.setBackground(Color.WHITE);
 
-        addDetailRow("📅 Order Date:", date, contentPanel);
-        addDetailRow("🏢 Restaurant:", restaurant, contentPanel);
-        addDetailRow("🍽️ Items:", items, contentPanel);
-        addDetailRow("💰 Total Amount:", total, contentPanel);
-        addDetailRow("✅ Status:", "Delivered successfully!", contentPanel);
+        addDetailRow("Order Date:", date, contentPanel);
+        addDetailRow("Restaurant:", restaurant, contentPanel);
+        addDetailRow("Items:", items, contentPanel);
+        addDetailRow("Total Amount:", total, contentPanel);
+        addDetailRow("Status:", "Delivered successfully!", contentPanel);
 
         // Add some spacing
         contentPanel.add(Box.createVerticalStrut(20));
 
         // Item list (simplified - you would populate this with actual items)
         JTextArea itemDetails = new JTextArea();
-        itemDetails.setText("🍔 Cheeseburger x2 - $18.00\n🍟 French Fries x1 - $4.50\n🥤 Cola x1 - $2.50");
+        itemDetails.setText("Cheeseburger x2 - $18.00\nFrench Fries x1 - $4.50\nCola x1 - $2.50");
         itemDetails.setFont(new Font("Monospaced", Font.PLAIN, 14));
         itemDetails.setEditable(false);
-        itemDetails.setBorder(BorderFactory.createTitledBorder("📝 Order Items"));
+        itemDetails.setBorder(BorderFactory.createTitledBorder("Order Items"));
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         buttonPanel.setBackground(Color.WHITE);
 
-        JButton btnReorder = createStyledButton("🔄 Reorder This", Color.decode("#9b59b6"), 14);
-        JButton btnClose = createStyledButton("✖️ Close", Color.decode("#95a5a6"), 14);
+        JButton btnReorder = createStyledButton("Reorder This", Color.decode("#9b59b6"), 14);
+        JButton btnClose = createStyledButton("Close", Color.decode("#95a5a6"), 14);
 
         btnClose.addActionListener(e -> detailDialog.dispose());
 
