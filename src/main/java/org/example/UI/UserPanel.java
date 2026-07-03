@@ -54,49 +54,76 @@ public class UserPanel extends JPanel {
     private final JTable userTable = new JTable(tableModel);
     private TableRowSorter<DefaultTableModel> tableSorter;
 
+    // Statistics labels
     private final JLabel lblTotalUsers = new JLabel("Total: 0");
     private final JLabel lblAdmins = new JLabel("Admins: 0");
-    private final JLabel lblActive = new JLabel("Active: 0");
     private final JLabel lblSelectedInfo = new JLabel("Select a user");
 
-    // UI components
-    private JLabel formTitle;
+    // Buttons
     private JButton btnAdd;
     private JButton btnUpdate;
     private JButton btnDelete;
     private JButton btnClear;
     private JButton btnRefresh;
     private JButton btnSearchBtn;
-    private JButton btnExport;
 
     private JSplitPane splitPane;
+    private boolean isResizing = false;
 
     public UserPanel(UserResponse currentUser) {
-        initializeUI();
-        setupEventListeners();
-        loadAllUsers();
-        updateFormMode(); // set initial mode to Add
-    }
-
-    private void initializeUI() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // Make it full screen
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setPreferredSize(screenSize);
+        initializeUI();
+        setupEventListeners();
+        loadAllUsers();
 
+        setupAutoFullScreen();
+    }
+
+    private void setupAutoFullScreen() {
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (!isResizing) {
+                    adjustComponentsForFullScreen();
+                }
+            }
+        });
+    }
+
+    private void adjustComponentsForFullScreen() {
+        int width = getWidth();
+        int height = getHeight();
+
+        if (width <= 100 || height <= 100) return;
+
+        if (splitPane != null && splitPane.getWidth() > 100) {
+            try {
+                isResizing = true;
+                double location = Math.max(0.3, Math.min(0.4, (double) width * 0.35 / width));
+                splitPane.setDividerLocation(location);
+            } finally {
+                isResizing = false;
+            }
+        }
+    }
+
+    private void initializeUI() {
         JPanel topPanel = createTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
-        // Main content panel with split pane
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setResizeWeight(0.4);
+        splitPane.setResizeWeight(0.35);
         splitPane.setContinuousLayout(true);
-        splitPane.setBorder(null);
+        splitPane.setDividerSize(5);
+        splitPane.setOneTouchExpandable(true);
 
         JPanel formPanel = createFormPanel();
-        splitPane.setLeftComponent(formPanel);
+        JScrollPane formScrollPane = new JScrollPane(formPanel);
+        formScrollPane.setBorder(null);
+        formScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        splitPane.setLeftComponent(formScrollPane);
 
         JPanel tablePanel = createTablePanel();
         splitPane.setRightComponent(tablePanel);
@@ -106,28 +133,11 @@ public class UserPanel extends JPanel {
         JPanel statsPanel = createStatsPanel();
         add(statsPanel, BorderLayout.SOUTH);
 
-        // Add window listener for resizing
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                resizeComponents();
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-                SwingUtilities.invokeLater(() -> {
-                    if (splitPane != null && splitPane.getWidth() > 0) {
-                        splitPane.setDividerLocation(0.4);
-                    }
-                });
+        SwingUtilities.invokeLater(() -> {
+            if (splitPane != null && splitPane.getWidth() > 100) {
+                splitPane.setDividerLocation(0.35);
             }
         });
-    }
-
-    private void resizeComponents() {
-        if (splitPane != null && splitPane.getWidth() > 0) {
-            splitPane.setDividerLocation(0.4);
-        }
     }
 
     private JPanel createTopPanel() {
@@ -138,11 +148,11 @@ public class UserPanel extends JPanel {
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
-        JLabel titleLabel = new JLabel("User Management");
+        JLabel titleLabel = new JLabel("User Management System");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
         titleLabel.setForeground(Color.decode("#2c3e50"));
 
-        JPanel searchPanel = new JPanel(new BorderLayout(15, 0));
+        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
         searchPanel.setBackground(Color.decode("#f8f9fa"));
 
         JLabel searchLabel = new JLabel("Search:");
@@ -152,10 +162,10 @@ public class UserPanel extends JPanel {
         txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 16));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.decode("#3498db"), 2),
-                BorderFactory.createEmptyBorder(12, 20, 12, 20)
+                BorderFactory.createEmptyBorder(12, 15, 12, 15)
         ));
-        txtSearch.setPreferredSize(new Dimension(400, 45));
-        txtSearch.setToolTipText("Search by name, email, phone, status...");
+        txtSearch.setPreferredSize(new Dimension(350, 45));
+        txtSearch.setToolTipText("Search by name, email, phone, address, or status...");
 
         btnSearchBtn = createIconButton("Search", Color.decode("#3498db"), 16);
         btnSearchBtn.setToolTipText("Search");
@@ -167,16 +177,10 @@ public class UserPanel extends JPanel {
             txtSearch.requestFocus();
         });
 
-        btnExport = createIconButton("Export", Color.decode("#2ecc71"), 14);
-        btnExport.setToolTipText("Export to CSV");
-        btnExport.addActionListener(e -> exportUsers());
-
         JPanel searchButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         searchButtons.setBackground(Color.decode("#f8f9fa"));
         searchButtons.add(btnSearchBtn);
         searchButtons.add(btnClearSearch);
-        searchButtons.add(Box.createHorizontalStrut(20));
-        searchButtons.add(btnExport);
 
         searchPanel.add(searchLabel, BorderLayout.WEST);
         searchPanel.add(txtSearch, BorderLayout.CENTER);
@@ -194,7 +198,7 @@ public class UserPanel extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        formTitle = new JLabel("Add User");
+        JLabel formTitle = new JLabel("Add / Edit User");
         formTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
         formTitle.setForeground(Color.decode("#2c3e50"));
         formTitle.setBounds(20, 20, 400, 40);
@@ -203,42 +207,39 @@ public class UserPanel extends JPanel {
         int yPos = 80;
         int fieldWidth = 500;
         int labelWidth = 150;
-        int fieldX = labelWidth + 30;
 
         addFormField("User ID:", txtId, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        yPos += 60;
 
         addFormField("Full Name:", txtName, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        yPos += 60;
 
-        JLabel lblGender = new JLabel("Gender:");
-        lblGender.setBounds(20, yPos, labelWidth, 30);
-        lblGender.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblGender.setForeground(Color.decode("#2c3e50"));
-        panel.add(lblGender);
-
-        txtGender.setBounds(fieldX, yPos, fieldWidth - labelWidth - 30, 35);
-        txtGender.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtGender.setBackground(Color.WHITE);
-        panel.add(txtGender);
-        yPos += 55;
+        addComboBoxField("Gender:", txtGender, 20, yPos, labelWidth, fieldWidth, panel);
+        yPos += 60;
 
         addFormField("Date of Birth:", txtDob, 20, yPos, labelWidth, fieldWidth, panel);
+
+        JButton btnDatePicker = createIconButton("Pick", Color.decode("#9b59b6"), 14);
+        btnDatePicker.setBounds(20 + labelWidth + fieldWidth - 170, yPos, 60, 35);
+        btnDatePicker.setToolTipText("Click for date picker");
+        btnDatePicker.addActionListener(e -> showSimpleDatePickerDialog());
+        panel.add(btnDatePicker);
+
         JLabel dobHint = new JLabel("(YYYY-MM-DD)");
-        dobHint.setBounds(fieldX + fieldWidth - labelWidth - 130, yPos, 120, 30);
+        dobHint.setBounds(20 + labelWidth + fieldWidth - 110, yPos, 100, 35);
         dobHint.setFont(new Font("SansSerif", Font.ITALIC, 12));
         dobHint.setForeground(Color.GRAY);
         panel.add(dobHint);
-        yPos += 55;
+        yPos += 60;
 
         addFormField("Phone Number:", txtPhone, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        yPos += 60;
 
         addFormField("Address:", txtAddress, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        yPos += 60;
 
         addFormField("Email:", txtEmail, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        yPos += 60;
 
         JLabel lblPassword = new JLabel("Password:");
         lblPassword.setBounds(20, yPos, labelWidth, 30);
@@ -246,7 +247,7 @@ public class UserPanel extends JPanel {
         lblPassword.setForeground(Color.decode("#2c3e50"));
         panel.add(lblPassword);
 
-        txtPassword.setBounds(fieldX, yPos, fieldWidth - labelWidth - 80, 35);
+        txtPassword.setBounds(20 + labelWidth + 10, yPos, fieldWidth - labelWidth - 80, 35);
         txtPassword.setFont(new Font("SansSerif", Font.PLAIN, 16));
         txtPassword.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
@@ -255,35 +256,17 @@ public class UserPanel extends JPanel {
         panel.add(txtPassword);
 
         JButton btnShowPassword = createIconButton("Show", Color.decode("#7f8c8d"), 14);
-        btnShowPassword.setBounds(fieldX + fieldWidth - labelWidth - 75, yPos, 60, 35);
+        btnShowPassword.setBounds(20 + labelWidth + fieldWidth - 70, yPos, 60, 35);
         btnShowPassword.setToolTipText("Show/Hide Password");
-        btnShowPassword.addActionListener(e -> {
-            if (txtPassword.getEchoChar() == '•') {
-                txtPassword.setEchoChar((char) 0);
-                btnShowPassword.setText("Hide");
-            } else {
-                txtPassword.setEchoChar('•');
-                btnShowPassword.setText("Show");
-            }
-        });
+        btnShowPassword.addActionListener(e -> togglePasswordVisibility(btnShowPassword));
         panel.add(btnShowPassword);
-        yPos += 55;
+        yPos += 60;
 
-        JLabel lblStatus = new JLabel("Status:");
-        lblStatus.setBounds(20, yPos, labelWidth, 30);
-        lblStatus.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblStatus.setForeground(Color.decode("#2c3e50"));
-        panel.add(lblStatus);
-
-        txtStatus.setBounds(fieldX, yPos, fieldWidth - labelWidth - 30, 35);
-        txtStatus.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtStatus.setBackground(Color.WHITE);
-        panel.add(txtStatus);
+        addComboBoxField("Status:", txtStatus, 20, yPos, labelWidth, fieldWidth, panel);
         yPos += 70;
 
-        // Action buttons - now with separate Add and Update
         JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 15, 15));
-        buttonPanel.setBounds(20, yPos, fieldWidth + 30, 110);
+        buttonPanel.setBounds(20, yPos, fieldWidth, 110);
         buttonPanel.setBackground(Color.WHITE);
 
         btnAdd = createStyledButton("Add User", Color.decode("#2ecc71"));
@@ -292,48 +275,113 @@ public class UserPanel extends JPanel {
         btnClear = createStyledButton("Clear", Color.decode("#95a5a6"));
         btnRefresh = createStyledButton("Refresh", Color.decode("#9b59b6"));
 
-        Dimension buttonSize = new Dimension(150, 45);
-        btnAdd.setPreferredSize(buttonSize);
-        btnUpdate.setPreferredSize(buttonSize);
-        btnDelete.setPreferredSize(buttonSize);
-        btnClear.setPreferredSize(buttonSize);
-        btnRefresh.setPreferredSize(buttonSize);
-
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnClear);
         buttonPanel.add(btnRefresh);
-        buttonPanel.add(new JLabel()); // empty cell
-
+        buttonPanel.add(new JLabel());
         panel.add(buttonPanel);
 
-        yPos += 130;
+        yPos += 120;
 
-        JLabel tipsLabel = new JLabel("<html><div style='text-align: center;'>Tips:<br>" +
-                "• Double-click row to edit<br>" +
-                "• Click status to filter<br>" +
-                "• Use Ctrl+F to search<br>" +
-                "• Press Enter to navigate fields</div></html>");
-        tipsLabel.setBounds(20, yPos, fieldWidth + 30, 80);
-        tipsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        tipsLabel.setForeground(Color.decode("#7f8c8d"));
-        tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel tipsLabel = new JLabel("<html><div style='text-align: center; color: #7f8c8d; font-size: 12px;'>" +
+                "Quick Tips: Double-click row to edit | Ctrl+F to search | F5 to refresh | Delete to remove</div></html>");
+        tipsLabel.setBounds(20, yPos, fieldWidth, 40);
         panel.add(tipsLabel);
+
+        panel.setPreferredSize(new Dimension(600, yPos + 50));
 
         return panel;
     }
 
+    private void addComboBoxField(String label, JComboBox<String> comboBox, int x, int y, int labelWidth, int fieldWidth, JPanel panel) {
+        JLabel lbl = new JLabel(label);
+        lbl.setBounds(x, y, labelWidth, 30);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lbl.setForeground(Color.decode("#2c3e50"));
+        panel.add(lbl);
+
+        comboBox.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        comboBox.setBackground(Color.WHITE);
+        panel.add(comboBox);
+    }
+
+    private void showSimpleDatePickerDialog() {
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
+
+        Integer[] years = new Integer[150];
+        for (int i = 0; i < 150; i++) {
+            years[i] = currentYear - i;
+        }
+
+        String[] months = {"01 - January", "02 - February", "03 - March", "04 - April",
+                "05 - May", "06 - June", "07 - July", "08 - August",
+                "09 - September", "10 - October", "11 - November", "12 - December"};
+
+        JComboBox<Integer> yearCombo = new JComboBox<>(years);
+        JComboBox<String> monthCombo = new JComboBox<>(months);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.add(new JLabel("Year:"));
+        panel.add(yearCombo);
+        panel.add(new JLabel("Month:"));
+        panel.add(monthCombo);
+        panel.add(new JLabel("Day:"));
+
+        JTextField dayField = new JTextField("01");
+        dayField.setToolTipText("Enter day (1-31)");
+        panel.add(dayField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel,
+                "Select Date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int year = (int) yearCombo.getSelectedItem();
+                String monthStr = (String) monthCombo.getSelectedItem();
+                int month = Integer.parseInt(monthStr.substring(0, 2).trim());
+                int day = Integer.parseInt(dayField.getText().trim());
+
+                if (day < 1 || day > 31) {
+                    JOptionPane.showMessageDialog(this, "Day must be between 1 and 31",
+                            "Invalid Day", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                String dateStr = String.format("%04d-%02d-%02d", year, month, day);
+                txtDob.setText(dateStr);
+                validateDateOfBirth();
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Please enter valid numbers",
+                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void togglePasswordVisibility(JButton btnShowPassword) {
+        if (txtPassword.getEchoChar() == '•') {
+            txtPassword.setEchoChar((char) 0);
+            btnShowPassword.setText("Hide");
+        } else {
+            txtPassword.setEchoChar('•');
+            btnShowPassword.setText("Show");
+        }
+    }
+
     private JPanel createTablePanel() {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 30));
 
         JPanel tableHeader = new JPanel(new BorderLayout());
         tableHeader.setBackground(Color.WHITE);
-        tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        JLabel tableTitle = new JLabel("Users List");
+        JLabel tableTitle = new JLabel("All Users List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
         tableTitle.setForeground(Color.decode("#2c3e50"));
 
@@ -369,7 +417,7 @@ public class UserPanel extends JPanel {
                         c.setBackground(new Color(240, 248, 255));
                     }
                 } else {
-                    c.setBackground(new Color(220, 240, 255));
+                    c.setBackground(new Color(52, 152, 219, 100));
                     c.setForeground(Color.BLACK);
                 }
 
@@ -398,6 +446,7 @@ public class UserPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
         scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         panel.add(tableHeader, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -419,6 +468,7 @@ public class UserPanel extends JPanel {
         lblAdmins.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblAdmins.setForeground(Color.decode("#e74c3c"));
 
+        JLabel lblActive = new JLabel("Active: 0");
         lblActive.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblActive.setForeground(Color.decode("#27ae60"));
 
@@ -437,7 +487,6 @@ public class UserPanel extends JPanel {
             @Override public void changedUpdate(DocumentEvent e) { filterTable(); }
         });
 
-        // Button actions
         btnAdd.addActionListener(e -> addUser());
         btnUpdate.addActionListener(e -> updateUser());
         btnDelete.addActionListener(e -> deleteUser());
@@ -479,12 +528,26 @@ public class UserPanel extends JPanel {
 
         setupKeyboardShortcuts();
 
-        txtDob.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtDob.addFocusListener(new FocusAdapter() {
             @Override
-            public void focusLost(java.awt.event.FocusEvent e) {
+            public void focusLost(FocusEvent e) {
                 validateDateOfBirth();
             }
         });
+
+        txtDob.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                formatDateInput();
+            }
+        });
+    }
+
+    private void formatDateInput() {
+        String text = txtDob.getText();
+        if (text.length() == 4 || text.length() == 7) {
+            txtDob.setText(text + "-");
+        }
     }
 
     private void setupKeyboardShortcuts() {
@@ -526,6 +589,19 @@ public class UserPanel extends JPanel {
             }
         });
 
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke("ESCAPE"), "clearForm");
+        getActionMap().put("clearForm", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearForm();
+            }
+        });
+
+        setupEnterKeyNavigation();
+    }
+
+    private void setupEnterKeyNavigation() {
         txtName.addActionListener(e -> txtGender.requestFocus());
         txtGender.addActionListener(e -> txtDob.requestFocus());
         txtDob.addActionListener(e -> txtPhone.requestFocus());
@@ -533,7 +609,10 @@ public class UserPanel extends JPanel {
         txtAddress.addActionListener(e -> txtEmail.requestFocus());
         txtEmail.addActionListener(e -> txtPassword.requestFocus());
         txtPassword.addActionListener(e -> txtStatus.requestFocus());
-        // No action on status to avoid auto-save
+        txtStatus.addActionListener(e -> {
+            if (txtId.getText().isEmpty()) addUser();
+            else updateUser();
+        });
     }
 
     private void filterTable() {
@@ -543,13 +622,11 @@ public class UserPanel extends JPanel {
             tableSorter.setRowFilter(null);
         } else {
             List<javax.swing.RowFilter<Object, Object>> filters = new ArrayList<>();
-
             for (int i = 0; i < tableModel.getColumnCount() - 1; i++) {
                 if (i != 0) {
                     filters.add(javax.swing.RowFilter.regexFilter("(?i)" + searchText, i));
                 }
             }
-
             javax.swing.RowFilter<Object, Object> orFilter = javax.swing.RowFilter.orFilter(filters);
             tableSorter.setRowFilter(orFilter);
         }
@@ -557,17 +634,69 @@ public class UserPanel extends JPanel {
 
     private void validateDateOfBirth() {
         String dobText = txtDob.getText().trim();
-        if (!dobText.isEmpty()) {
-            try {
-                LocalDate.parse(dobText, dateFormatter);
-                txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#27ae60"), 2));
-            } catch (DateTimeParseException e) {
+
+        if (dobText.isEmpty()) {
+            txtDob.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+            return;
+        }
+
+        try {
+            LocalDate dob = LocalDate.parse(dobText, dateFormatter);
+            LocalDate today = LocalDate.now();
+
+            if (dob.isAfter(today)) {
                 txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
                 JOptionPane.showMessageDialog(this,
-                        "Invalid date format! Please use YYYY-MM-DD",
+                        "Date of birth cannot be in the future!",
                         "Date Error", JOptionPane.WARNING_MESSAGE);
                 txtDob.requestFocus();
+            } else if (dob.getYear() < 1900) {
+                txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+                JOptionPane.showMessageDialog(this,
+                        "Date of birth must be after 1900!",
+                        "Date Error", JOptionPane.WARNING_MESSAGE);
+                txtDob.requestFocus();
+            } else {
+                int age = today.getYear() - dob.getYear();
+                if (today.getMonthValue() < dob.getMonthValue() ||
+                        (today.getMonthValue() == dob.getMonthValue() && today.getDayOfMonth() < dob.getDayOfMonth())) {
+                    age--;
+                }
+
+                if (age < 0) {
+                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid date! Age cannot be negative.",
+                            "Date Error", JOptionPane.WARNING_MESSAGE);
+                    txtDob.requestFocus();
+                } else if (age < 13) {
+                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#f39c12"), 2));
+                    JOptionPane.showMessageDialog(this,
+                            "User is under 13 years old (" + age + " years). Are you sure?",
+                            "Age Warning", JOptionPane.WARNING_MESSAGE);
+                } else if (age > 150) {
+                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#f39c12"), 2));
+                    JOptionPane.showMessageDialog(this,
+                            "User is over 150 years old (" + age + " years). Please verify.",
+                            "Age Warning", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#27ae60"), 2));
+                }
             }
+        } catch (DateTimeParseException e) {
+            txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+            String message;
+            if (!dobText.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                message = "Invalid date format!\nPlease use: YYYY-MM-DD\nExample: 1990-01-15";
+            } else if (dobText.length() != 10) {
+                message = "Date must be exactly 10 characters!\nFormat: YYYY-MM-DD";
+            } else {
+                message = "Invalid date!\nPlease check:\n- Year: 1900-2024\n- Month: 01-12\n- Day: 01-31";
+            }
+            JOptionPane.showMessageDialog(this,
+                    message,
+                    "Date Error", JOptionPane.WARNING_MESSAGE);
+            txtDob.requestFocus();
         }
     }
 
@@ -588,7 +717,7 @@ public class UserPanel extends JPanel {
 
             String email = txtEmail.getText().trim();
             if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-                showValidationError("Invalid email format", txtEmail);
+                showValidationError("Invalid email format. Example: user@example.com", txtEmail);
                 return;
             }
 
@@ -596,9 +725,15 @@ public class UserPanel extends JPanel {
                 try {
                     LocalDate.parse(txtDob.getText().trim(), dateFormatter);
                 } catch (DateTimeParseException e) {
-                    showValidationError("Invalid date format (YYYY-MM-DD)", txtDob);
+                    showValidationError("Invalid date format. Please use: YYYY-MM-DD", txtDob);
                     return;
                 }
+            }
+
+            String phone = txtPhone.getText().trim();
+            if (!phone.isEmpty() && !phone.matches("\\d{9,15}")) {
+                showValidationError("Phone number must be 9-15 digits", txtPhone);
+                return;
             }
 
             UserRequest request = collectFormData();
@@ -654,7 +789,6 @@ public class UserPanel extends JPanel {
                         "User updated successfully!", "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                 loadAllUsers();
-                clearForm();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error updating user: " + ex.getMessage(),
@@ -705,20 +839,6 @@ public class UserPanel extends JPanel {
                 "User list refreshed!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void exportUsers() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Export Users");
-        fileChooser.setSelectedFile(new java.io.File("users_" +
-                java.time.LocalDate.now() + ".csv"));
-
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            JOptionPane.showMessageDialog(this,
-                    "<html><div style='font-size:12pt;'>Export feature coming soon!<br><br>" +
-                            "Would export " + tableModel.getRowCount() + " users.</div></html>",
-                    "Export", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
     private UserRequest collectFormData() {
         String gender = (String) txtGender.getSelectedItem();
         String status = (String) txtStatus.getSelectedItem();
@@ -747,7 +867,7 @@ public class UserPanel extends JPanel {
                 tableModel.addRow(new Object[]{
                         user.getId(),
                         user.getName(),
-                        user.getGender(),
+                        user.getGender() != null ? user.getGender() : "",
                         user.getDateOfBirth() != null ? user.getDateOfBirth() : "N/A",
                         user.getPhone() != null ? user.getPhone() : "N/A",
                         user.getAddress(),
@@ -766,7 +886,20 @@ public class UserPanel extends JPanel {
 
             lblTotalUsers.setText("Total: " + users.size());
             lblAdmins.setText("Admins: " + adminCount);
-            lblActive.setText("Active: " + activeCount);
+
+            for (Component comp : getComponents()) {
+                if (comp instanceof JPanel) {
+                    JPanel panel = (JPanel) comp;
+                    for (Component c : panel.getComponents()) {
+                        if (c instanceof JLabel) {
+                            JLabel label = (JLabel) c;
+                            if (label.getText().startsWith("Active:")) {
+                                label.setText("Active: " + activeCount);
+                            }
+                        }
+                    }
+                }
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
@@ -803,8 +936,6 @@ public class UserPanel extends JPanel {
         txtPassword.setText("");
 
         lblSelectedInfo.setText("Selected: " + tableModel.getValueAt(modelRow, 1).toString());
-
-        updateFormMode();
     }
 
     private void clearForm() {
@@ -821,16 +952,6 @@ public class UserPanel extends JPanel {
         lblSelectedInfo.setText("Select a user");
         userTable.clearSelection();
         tableSorter.setRowFilter(null);
-
-        updateFormMode();
-    }
-
-    // Dynamically update form title and button states
-    private void updateFormMode() {
-        boolean editing = !txtId.getText().trim().isEmpty();
-        formTitle.setText(editing ? "Edit User" : "Add User");
-        btnAdd.setEnabled(!editing);
-        btnUpdate.setEnabled(editing);
     }
 
     // UI Helper methods
@@ -871,7 +992,7 @@ public class UserPanel extends JPanel {
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(12, 25, 12, 25)
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -895,7 +1016,7 @@ public class UserPanel extends JPanel {
         button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
         button.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
