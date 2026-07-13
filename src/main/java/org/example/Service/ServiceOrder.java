@@ -12,4 +12,7 @@ public interface ServiceOrder {
     void deleteOrder(int orderId) throws MessageException;
     OrderResponse findOrderById(int orderId);
     List<OrderResponse> findAllOrders();
+
+    // NEW METHOD: retrieve orders for a specific user
+    List<OrderResponse> findOrdersByUserId(int userId);
 }

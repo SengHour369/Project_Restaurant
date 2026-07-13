@@ -2,7 +2,6 @@ package org.example.UI;
 
 import org.example.DTO.Response.UserResponse;
 import org.example.Service.ServiceImplement.ServiceUserImp;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -23,7 +22,6 @@ public class LoginFrame extends JFrame {
     private void initializeUI() {
         setTitle("Food Order System - Login");
         setSize(450, 350);
-
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -85,7 +83,6 @@ public class LoginFrame extends JFrame {
 
         btnLogin.setBounds(50, 150, 120, 35);
         btnRegister.setBounds(180, 150, 120, 35);
-
         contentPanel.add(btnLogin);
         contentPanel.add(btnRegister);
 
@@ -98,7 +95,6 @@ public class LoginFrame extends JFrame {
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
         add(mainPanel);
-
         SwingUtilities.invokeLater(txtusername::requestFocus);
     }
 
@@ -107,6 +103,7 @@ public class LoginFrame extends JFrame {
         btnRegister.addActionListener(e -> openRegister());
         txtPassword.addActionListener(e -> performLogin());
         txtusername.addActionListener(e -> txtPassword.requestFocus());
+
         setupKeyboardShortcuts();
     }
 
@@ -174,13 +171,11 @@ public class LoginFrame extends JFrame {
         Timer timer = new Timer(1500, e -> {
             try {
                 UserResponse user = userService.login(username, password);
-
                 if (user != null) {
                     lblError.setText("");
                     JOptionPane.showMessageDialog(this,
                             String.format("Welcome back, %s!", user.getName()),
                             "Login Successful", JOptionPane.INFORMATION_MESSAGE);
-
                     SwingUtilities.invokeLater(() -> {
                         if ("ADMIN".equalsIgnoreCase(user.getStatus())) {
                             new AdminDashboard(user).setVisible(true);
@@ -193,15 +188,12 @@ public class LoginFrame extends JFrame {
                     lblError.setText("Invalid username or password");
                     txtPassword.setText("");
                     txtPassword.requestFocus();
-
                     btnLogin.setText("Login");
                     btnLogin.setEnabled(true);
                     btnRegister.setEnabled(true);
                 }
             } catch (Exception ex) {
                 lblError.setText("System error: " + ex.getMessage());
-                System.err.println("Login error: " + ex.getMessage());
-
                 btnLogin.setText("Login");
                 btnLogin.setEnabled(true);
                 btnRegister.setEnabled(true);
@@ -228,7 +220,6 @@ public class LoginFrame extends JFrame {
 
         bottomPanel.add(btnClose);
         registerDialog.add(bottomPanel, BorderLayout.SOUTH);
-
         registerDialog.setVisible(true);
     }
 
@@ -243,21 +234,20 @@ public class LoginFrame extends JFrame {
         String helpMessage = """
             Login Help
 
-            Username: Enter your registered email address
+            Email: Enter your registered email address
             Password: Enter your password
 
             Tips:
-            • Press Enter in password field to login
-            • Press Esc to clear all fields
-            • Ctrl+R to open registration
-            • Ctrl+L to focus on email field
+            - Press Enter in password field to login
+            - Press Esc to clear all fields
+            - Ctrl+R to open registration
+            - Ctrl+L to focus on email field
 
             Forgot Password?
             Contact administrator to reset your password
 
             Support: support@foodorder.com
             """;
-
         JOptionPane.showMessageDialog(this, helpMessage,
                 "Login Help", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -273,7 +263,6 @@ public class LoginFrame extends JFrame {
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -282,7 +271,6 @@ public class LoginFrame extends JFrame {
                 button.setBackground(color);
             }
         });
-
         return button;
     }
 

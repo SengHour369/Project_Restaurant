@@ -1,7 +1,6 @@
 package org.example.UI;
 
 import org.example.DTO.Response.UserResponse;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -19,7 +18,6 @@ public class CustomerApp extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.decode("#3498db"));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
@@ -39,7 +37,6 @@ public class CustomerApp extends JFrame {
         });
         headerPanel.add(btnLogout, BorderLayout.EAST);
 
-        // Main content
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("SansSerif", Font.BOLD, 14));
 
