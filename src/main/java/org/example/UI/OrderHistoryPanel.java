@@ -44,7 +44,7 @@ public class OrderHistoryPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(Color.decode("#FFF6EC"));
 
         // Header Panel
         JPanel headerPanel = createHeaderPanel();
@@ -61,29 +61,29 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#f8f9fa"));
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
 
         // Title
-        JLabel titleLabel = new JLabel("Your Order History");
+        JLabel titleLabel = new JLabel("📋 Your Order History");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        titleLabel.setForeground(Color.decode("#2c3e50"));
+        titleLabel.setForeground(Color.decode("#6B4226"));
 
         // Filter panel
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        filterPanel.setBackground(Color.decode("#f8f9fa"));
+        filterPanel.setBackground(Color.decode("#FFF6EC"));
 
         JLabel filterLabel = new JLabel("Filter:");
         filterLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         filterCombo.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        filterCombo.setBackground(Color.WHITE);
+        filterCombo.setBackground(Color.decode("#FFF6EC"));
         filterCombo.addActionListener(e -> filterOrders());
 
-        JButton btnRefresh = createStyledButton("Refresh", Color.decode("#3498db"), 14);
+        JButton btnRefresh = createStyledButton("Refresh", Color.decode("#FF9F45"), 14);
         btnRefresh.addActionListener(e -> loadOrderHistory());
 
         filterPanel.add(filterLabel);
@@ -99,14 +99,14 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Style the table
         orderTable.setRowHeight(40);
         orderTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
         orderTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        orderTable.getTableHeader().setBackground(Color.decode("#34495e"));
+        orderTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
         orderTable.getTableHeader().setForeground(Color.WHITE);
 
         // Add alternating row colors
@@ -118,15 +118,15 @@ public class OrderHistoryPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.WHITE);
+                        c.setBackground(Color.decode("#FFF6EC"));
                     } else {
-                        c.setBackground(new Color(240, 248, 255)); // Light blue
+                        c.setBackground(new Color(255, 244, 230)); // Light blue
                     }
                 }
 
                 // Style for total column
                 if (column == 4 && value != null) {
-                    setForeground(Color.decode("#27ae60")); // Green color for money
+                    setForeground(Color.decode("#5FAD56")); // Green color for money
                     setFont(getFont().deriveFont(Font.BOLD));
                 }
 
@@ -174,7 +174,7 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createStatsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
-        panel.setBackground(Color.decode("#f1f8ff"));
+        panel.setBackground(Color.decode("#FFF1E0"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
@@ -182,15 +182,15 @@ public class OrderHistoryPanel extends JPanel {
 
         // Style statistics labels
         lblTotalOrders.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalOrders.setForeground(Color.decode("#2c3e50"));
+        lblTotalOrders.setForeground(Color.decode("#6B4226"));
 
         lblTotalSpent.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalSpent.setForeground(Color.decode("#27ae60"));
+        lblTotalSpent.setForeground(Color.decode("#5FAD56"));
 
         // Average order value
         JLabel lblAvgOrder = new JLabel("Average Order: $0.00");
         lblAvgOrder.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        lblAvgOrder.setForeground(Color.decode("#7f8c8d"));
+        lblAvgOrder.setForeground(Color.decode("#A67B5B"));
 
         panel.add(lblTotalOrders);
         panel.add(lblTotalSpent);
@@ -288,7 +288,7 @@ public class OrderHistoryPanel extends JPanel {
 
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.decode("#3498db"));
+        headerPanel.setBackground(Color.decode("#FF9F45"));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
         JLabel headerLabel = new JLabel(orderId + " - " + restaurant);
@@ -300,7 +300,7 @@ public class OrderHistoryPanel extends JPanel {
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBackground(Color.decode("#FFF6EC"));
 
         addDetailRow("Order Date:", date, contentPanel);
         addDetailRow("Restaurant:", restaurant, contentPanel);
@@ -320,10 +320,10 @@ public class OrderHistoryPanel extends JPanel {
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBackground(Color.decode("#FFF6EC"));
 
-        JButton btnReorder = createStyledButton("Reorder This", Color.decode("#9b59b6"), 14);
-        JButton btnClose = createStyledButton("Close", Color.decode("#95a5a6"), 14);
+        JButton btnReorder = createStyledButton("Reorder This", Color.decode("#E07A5F"), 14);
+        JButton btnClose = createStyledButton("Close", Color.decode("#D8A48F"), 14);
 
         btnClose.addActionListener(e -> detailDialog.dispose());
 
@@ -340,16 +340,16 @@ public class OrderHistoryPanel extends JPanel {
 
     private void addDetailRow(String label, String value, JPanel panel) {
         JPanel rowPanel = new JPanel(new BorderLayout());
-        rowPanel.setBackground(Color.WHITE);
+        rowPanel.setBackground(Color.decode("#FFF6EC"));
         rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 14));
-        lbl.setForeground(Color.decode("#2c3e50"));
+        lbl.setForeground(Color.decode("#6B4226"));
 
         JLabel val = new JLabel(value);
         val.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        val.setForeground(Color.decode("#7f8c8d"));
+        val.setForeground(Color.decode("#A67B5B"));
 
         rowPanel.add(lbl, BorderLayout.WEST);
         rowPanel.add(val, BorderLayout.EAST);
@@ -358,28 +358,7 @@ public class OrderHistoryPanel extends JPanel {
     }
 
     private JButton createStyledButton(String text, Color color, int fontSize) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 1),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
+        return UITheme.createButton(text, color);
     }
 
     // Custom cell renderer class

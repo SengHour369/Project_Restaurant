@@ -34,10 +34,10 @@ public class OrderPanel extends JPanel {
     private JTextField txtMenuItemSearch = new JTextField();
     private JComboBox<MenuItemResponse> cbMenuItem = new JComboBox<>();
     private JSpinner spnQuantity = new JSpinner(new SpinnerNumberModel(1, 1, 50, 1));
-    private JButton btnAddItem = new JButton("Add to Order");
-    private JButton btnRemoveItem = new JButton("Remove");
-    private JButton btnClearAll = new JButton("Clear All");
-    private JButton btnCreateOrder = new JButton("Create Order");
+    private JButton btnAddItem = UITheme.createButton("Add to Order", UITheme.PRIMARY);
+    private JButton btnRemoveItem = UITheme.createButton("Remove", UITheme.SECONDARY);
+    private JButton btnClearAll = UITheme.createButton("Clear All", UITheme.NEUTRAL);
+    private JButton btnCreateOrder = UITheme.createButton("Create Order", UITheme.SUCCESS);
     private JComboBox<String> cbPaymentType = new JComboBox<>(new String[]{"Credit Card", "Cash", "Mobile Payment", "Debit Card"});
 
     private DefaultTableModel cartModel = new DefaultTableModel(
@@ -66,6 +66,9 @@ public class OrderPanel extends JPanel {
     private JLabel lblTotal = new JLabel("Total: $0.00");
     private JSplitPane splitPane;
 
+    // FIX: Store restaurant ID separately to avoid repeated lookups
+    private int selectedRestaurantId = -1;
+
     public OrderPanel(UserResponse user) {
         this.currentUser = user;
         initializeUI();
@@ -76,7 +79,7 @@ public class OrderPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(Color.decode("#FFF6EC"));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setPreferredSize(screenSize);
 
@@ -116,15 +119,15 @@ public class OrderPanel extends JPanel {
 
     private JPanel createOrderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel headerLabel = new JLabel("Create New Order");
+        JLabel headerLabel = new JLabel("🍔 Create New Order");
         headerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        headerLabel.setForeground(Color.decode("#2c3e50"));
+        headerLabel.setForeground(Color.decode("#6B4226"));
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBackground(Color.decode("#FFF6EC"));
         headerPanel.add(headerLabel, BorderLayout.WEST);
         panel.add(headerPanel, BorderLayout.NORTH);
 
@@ -141,17 +144,17 @@ public class OrderPanel extends JPanel {
         panel.add(centerSplitPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBackground(Color.decode("#FFF6EC"));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
 
         lblRestaurant.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblRestaurant.setForeground(Color.decode("#3498db"));
+        lblRestaurant.setForeground(Color.decode("#FF9F45"));
 
         lblTotal.setFont(new Font("SansSerif", Font.BOLD, 18));
-        lblTotal.setForeground(Color.decode("#27ae60"));
+        lblTotal.setForeground(Color.decode("#5FAD56"));
 
         JPanel paymentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        paymentPanel.setBackground(Color.WHITE);
+        paymentPanel.setBackground(Color.decode("#FFF6EC"));
         JLabel lblPayment = new JLabel("Payment Type:");
         lblPayment.setFont(new Font("SansSerif", Font.BOLD, 14));
         cbPaymentType.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -161,23 +164,16 @@ public class OrderPanel extends JPanel {
         paymentPanel.add(Box.createHorizontalStrut(20));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setBackground(Color.WHITE);
-        btnCreateOrder.setBackground(Color.decode("#2ecc71"));
-        btnCreateOrder.setForeground(Color.WHITE);
-        btnCreateOrder.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btnCreateOrder.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#27ae60"), 2),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        buttonPanel.setBackground(Color.decode("#FFF6EC"));
         buttonPanel.add(btnCreateOrder);
 
         JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.setBackground(Color.WHITE);
+        leftPanel.setBackground(Color.decode("#FFF6EC"));
         leftPanel.add(lblRestaurant, BorderLayout.NORTH);
         leftPanel.add(paymentPanel, BorderLayout.SOUTH);
 
         JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setBackground(Color.WHITE);
+        rightPanel.setBackground(Color.decode("#FFF6EC"));
         rightPanel.add(lblTotal, BorderLayout.CENTER);
         rightPanel.add(buttonPanel, BorderLayout.EAST);
 
@@ -190,29 +186,23 @@ public class OrderPanel extends JPanel {
 
     private JPanel createMenuPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#3498db"), 2),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBorder(new UITheme.RoundedLineBorder(UITheme.PRIMARY, 20, 15, 15));
 
-        JLabel panelTitle = new JLabel("Menu Items");
+        JLabel panelTitle = new JLabel("🍜 Menu Items");
         panelTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
-        panelTitle.setForeground(Color.decode("#2c3e50"));
+        panelTitle.setForeground(Color.decode("#6B4226"));
         panelTitle.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(panelTitle, BorderLayout.NORTH);
 
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
-        searchPanel.setBackground(Color.WHITE);
+        searchPanel.setBackground(Color.decode("#FFF6EC"));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         txtMenuItemSearch.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        txtMenuItemSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
+        txtMenuItemSearch.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 8, 15));
         searchPanel.add(searchLabel, BorderLayout.WEST);
         searchPanel.add(txtMenuItemSearch, BorderLayout.CENTER);
         panel.add(searchPanel, BorderLayout.SOUTH);
@@ -224,11 +214,11 @@ public class OrderPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(menuList);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.decode("#FFF6EC"));
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel addItemPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        addItemPanel.setBackground(Color.WHITE);
+        addItemPanel.setBackground(Color.decode("#FFF6EC"));
         addItemPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
         JLabel lblItem = new JLabel("Selected Item:");
@@ -247,14 +237,7 @@ public class OrderPanel extends JPanel {
 
         addItemPanel.add(new JLabel());
         JPanel addButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        addButtonPanel.setBackground(Color.WHITE);
-        btnAddItem.setBackground(Color.decode("#3498db"));
-        btnAddItem.setForeground(Color.WHITE);
-        btnAddItem.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnAddItem.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#2980b9"), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)
-        ));
+        addButtonPanel.setBackground(Color.decode("#FFF6EC"));
         addButtonPanel.add(btnAddItem);
         addItemPanel.add(addButtonPanel);
         panel.add(addItemPanel, BorderLayout.NORTH);
@@ -279,21 +262,18 @@ public class OrderPanel extends JPanel {
 
     private JPanel createCartPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBorder(new UITheme.RoundedLineBorder(UITheme.SECONDARY, 20, 15, 15));
 
-        JLabel panelTitle = new JLabel("Your Cart");
+        JLabel panelTitle = new JLabel("🛒 Your Cart");
         panelTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
-        panelTitle.setForeground(Color.decode("#2c3e50"));
+        panelTitle.setForeground(Color.decode("#6B4226"));
         panelTitle.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(panelTitle, BorderLayout.NORTH);
 
         cartTable.setRowHeight(35);
         cartTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        cartTable.getTableHeader().setBackground(Color.decode("#34495e"));
+        cartTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
         cartTable.getTableHeader().setForeground(Color.WHITE);
         cartTable.getTableHeader().setPreferredSize(new Dimension(0, 40));
         cartTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -306,12 +286,12 @@ public class OrderPanel extends JPanel {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.WHITE);
+                        c.setBackground(Color.decode("#FFF6EC"));
                     } else {
-                        c.setBackground(new Color(240, 248, 255));
+                        c.setBackground(new Color(255, 244, 230));
                     }
                 } else {
-                    c.setBackground(new Color(220, 240, 255));
+                    c.setBackground(new Color(255, 224, 178));
                     c.setForeground(Color.BLACK);
                 }
                 if (column == 3 || column == 4) {
@@ -324,29 +304,14 @@ public class OrderPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(cartTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.decode("#FFF6EC"));
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBackground(Color.decode("#FFF6EC"));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
-        btnRemoveItem.setBackground(Color.decode("#e74c3c"));
-        btnRemoveItem.setForeground(Color.WHITE);
-        btnRemoveItem.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnRemoveItem.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#c0392b"), 1),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
         btnRemoveItem.setEnabled(false);
-
-        btnClearAll.setBackground(Color.decode("#95a5a6"));
-        btnClearAll.setForeground(Color.WHITE);
-        btnClearAll.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnClearAll.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#7f8c8d"), 1),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
 
         buttonPanel.add(btnRemoveItem);
         buttonPanel.add(btnClearAll);
@@ -357,25 +322,25 @@ public class OrderPanel extends JPanel {
 
     private JPanel createHistoryPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel headerLabel = new JLabel("Your Order History");
+        JLabel headerLabel = new JLabel("📋 Your Order History");
         headerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        headerLabel.setForeground(Color.decode("#2c3e50"));
+        headerLabel.setForeground(Color.decode("#6B4226"));
 
-        JButton btnRefresh = createIconButton("Refresh", Color.decode("#3498db"), 14);
+        JButton btnRefresh = createIconButton("Refresh", Color.decode("#FF9F45"), 14);
         btnRefresh.addActionListener(e -> loadOrderHistory());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBackground(Color.decode("#FFF6EC"));
         headerPanel.add(headerLabel, BorderLayout.WEST);
         headerPanel.add(btnRefresh, BorderLayout.EAST);
         panel.add(headerPanel, BorderLayout.NORTH);
 
         orderHistoryTable.setRowHeight(40);
         orderHistoryTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        orderHistoryTable.getTableHeader().setBackground(Color.decode("#34495e"));
+        orderHistoryTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
         orderHistoryTable.getTableHeader().setForeground(Color.WHITE);
         orderHistoryTable.getTableHeader().setPreferredSize(new Dimension(0, 45));
         orderHistoryTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -387,12 +352,12 @@ public class OrderPanel extends JPanel {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.WHITE);
+                        c.setBackground(Color.decode("#FFF6EC"));
                     } else {
-                        c.setBackground(new Color(240, 248, 255));
+                        c.setBackground(new Color(255, 244, 230));
                     }
                 } else {
-                    c.setBackground(new Color(220, 240, 255));
+                    c.setBackground(new Color(255, 224, 178));
                     c.setForeground(Color.BLACK);
                 }
                 if (column == 0) {
@@ -467,7 +432,244 @@ public class OrderPanel extends JPanel {
         });
     }
 
-    // ======================== ORDER CREATION (FIXED) ========================
+    // ======================== FIXED: ADD ITEM TO CART ========================
+
+    private void addItemToCart() {
+        try {
+            MenuItemResponse selectedItem = (MenuItemResponse) cbMenuItem.getSelectedItem();
+            if (selectedItem == null) {
+                JOptionPane.showMessageDialog(this, "Please select a menu item!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int quantity = (Integer) spnQuantity.getValue();
+            if (quantity <= 0) {
+                JOptionPane.showMessageDialog(this, "Quantity must be at least 1!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // FIX: Properly get the restaurant ID from the selected item
+            int restaurantId = selectedItem.getRestaurant();
+            if (restaurantId <= 0) {
+                JOptionPane.showMessageDialog(this,
+                        "This menu item doesn't have a valid restaurant assigned!\nPlease contact administrator.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // FIX: Check if items are from same restaurant
+            if (!orderItems.isEmpty()) {
+                int existingRestaurantId = getCurrentRestaurantId();
+                if (existingRestaurantId != restaurantId) {
+                    int response = JOptionPane.showConfirmDialog(this,
+                            "<html><div style='font-size:12pt;'>" +
+                                    "You're trying to add items from a different restaurant.<br>" +
+                                    "Your cart already has items from another restaurant.<br><br>" +
+                                    "<b>Would you like to clear the cart and start over?</b>" +
+                                    "</div></html>",
+                            "Different Restaurant",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        clearCartSilently();
+                    } else {
+                        return;
+                    }
+                }
+            }
+
+            // FIX: Get price as double
+            double price;
+            try {
+                price = Double.parseDouble(selectedItem.getPrice());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                        "Invalid price format for item: " + selectedItem.getPrice(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // FIX: Check if already in cart - using proper comparison
+            Integer itemId = selectedItem.getId();
+            boolean found = false;
+            for (int i = 0; i < cartModel.getRowCount(); i++) {
+                Object idObj = cartModel.getValueAt(i, 0);
+                if (idObj instanceof Integer && ((Integer) idObj).equals(itemId)) {
+                    int currentQty = (int) cartModel.getValueAt(i, 2);
+                    int newQty = currentQty + quantity;
+                    cartModel.setValueAt(newQty, i, 2);
+                    updateSubtotal(i);
+                    updateTotalAndRestaurant();
+
+                    // Update orderItems list
+                    for (OrderItemRequest item : orderItems) {
+                        if (item.getMenuItemId() == itemId) {
+                            item.setQuantity(newQty);
+                            break;
+                        }
+                    }
+                    found = true;
+                    JOptionPane.showMessageDialog(this,
+                            String.format("Updated quantity to %d x %s", newQty, selectedItem.getName()),
+                            "Item Updated", JOptionPane.INFORMATION_MESSAGE);
+                    break;
+                }
+            }
+
+            if (!found) {
+                // FIX: Calculate subtotal correctly
+                double subtotal = price * quantity;
+                cartModel.addRow(new Object[]{
+                        selectedItem.getId(),
+                        selectedItem.getName(),
+                        quantity,
+                        String.format("$%.2f", price),
+                        String.format("$%.2f", subtotal)
+                });
+
+                // FIX: Create OrderItemRequest with all required fields
+                OrderItemRequest orderItem = new OrderItemRequest();
+                orderItem.setMenuItemId(selectedItem.getId());
+                orderItem.setQuantity(quantity);
+                orderItem.setPrice(price);
+                // Note: OrderItemRequest might also need restaurantId or other fields
+                orderItems.add(orderItem);
+
+                // FIX: Update selected restaurant ID
+                selectedRestaurantId = restaurantId;
+
+                updateTotalAndRestaurant();
+                spnQuantity.setValue(1);
+                JOptionPane.showMessageDialog(this,
+                        String.format("Added %d x %s to cart!", quantity, selectedItem.getName()),
+                        "Item Added", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Error adding item: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Helper method to get current restaurant ID from cart
+    private int getCurrentRestaurantId() {
+        if (orderItems.isEmpty()) return -1;
+        int firstItemId = orderItems.get(0).getMenuItemId();
+        MenuItemResponse item = menuItemCache.get(firstItemId);
+        return item != null ? item.getRestaurant() : -1;
+    }
+
+    // Clear cart without confirmation (used when switching restaurants)
+    private void clearCartSilently() {
+        cartModel.setRowCount(0);
+        orderItems.clear();
+        selectedRestaurantId = -1;
+        lblRestaurant.setText("Selected Restaurant: None");
+        lblTotal.setText("Total: $0.00");
+    }
+
+    // ======================== FIXED: REMOVE SELECTED ITEM ========================
+
+    private void removeSelectedItem() {
+        int selectedRow = cartTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select an item to remove!", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "<html><div style='font-size:12pt;'>Remove this item from cart?</div></html>",
+                "Confirm Removal",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (confirm == JOptionPane.YES_OPTION) {
+            int itemId = (int) cartModel.getValueAt(selectedRow, 0);
+            cartModel.removeRow(selectedRow);
+            orderItems.removeIf(item -> item.getMenuItemId() == itemId);
+
+            // If cart is empty, reset restaurant
+            if (orderItems.isEmpty()) {
+                selectedRestaurantId = -1;
+                lblRestaurant.setText("Selected Restaurant: None");
+            }
+            updateTotalAndRestaurant();
+        }
+    }
+
+    // ======================== FIXED: CLEAR CART ========================
+
+    private void clearCart() {
+        if (cartModel.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "Cart is already empty!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "<html><div style='font-size:12pt;'>Clear all items from cart?</div></html>",
+                "Confirm Clear",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm == JOptionPane.YES_OPTION) {
+            clearCartSilently();
+        }
+    }
+
+    private void updateSubtotal(int row) {
+        int quantity = (int) cartModel.getValueAt(row, 2);
+        String priceStr = cartModel.getValueAt(row, 3).toString().replace("$", "");
+        double price = Double.parseDouble(priceStr);
+        double subtotal = quantity * price;
+        cartModel.setValueAt(String.format("$%.2f", subtotal), row, 4);
+        int itemId = (int) cartModel.getValueAt(row, 0);
+        for (OrderItemRequest item : orderItems) {
+            if (item.getMenuItemId() == itemId) {
+                item.setQuantity(quantity);
+                break;
+            }
+        }
+    }
+
+    private void updateTotalAndRestaurant() {
+        double total = calculateTotal();
+        lblTotal.setText(String.format("Total: $%.2f", total));
+
+        // FIX: Use stored restaurant ID to avoid repeated lookups
+        if (!orderItems.isEmpty() && selectedRestaurantId > 0) {
+            RestaurantResponse restaurant = findRestaurantById(selectedRestaurantId);
+            if (restaurant != null) {
+                lblRestaurant.setText("Selected Restaurant: " + restaurant.getName());
+            }
+        } else if (!orderItems.isEmpty()) {
+            // Fallback: get from first item
+            int firstItemId = orderItems.get(0).getMenuItemId();
+            MenuItemResponse firstItem = menuItemCache.get(firstItemId);
+            if (firstItem != null) {
+                RestaurantResponse restaurant = findRestaurantById(firstItem.getRestaurant());
+                if (restaurant != null) {
+                    lblRestaurant.setText("Selected Restaurant: " + restaurant.getName());
+                    selectedRestaurantId = firstItem.getRestaurant();
+                }
+            }
+        } else {
+            lblRestaurant.setText("Selected Restaurant: None");
+            btnRemoveItem.setEnabled(false);
+            selectedRestaurantId = -1;
+        }
+    }
+
+    private double calculateTotal() {
+        double total = 0;
+        for (int i = 0; i < cartModel.getRowCount(); i++) {
+            String subtotalStr = cartModel.getValueAt(i, 4).toString().replace("$", "");
+            try {
+                total += Double.parseDouble(subtotalStr);
+            } catch (NumberFormatException e) {
+                // Skip invalid entries
+            }
+        }
+        return total;
+    }
+
+    // ======================== FIXED: CREATE ORDER ========================
 
     private void createOrder() {
         if (orderItems.isEmpty()) {
@@ -477,7 +679,7 @@ public class OrderPanel extends JPanel {
             return;
         }
 
-        // --- FIX: Validate that the current user has a valid ID ---
+        // FIX: Validate that the current user has a valid ID
         if (currentUser == null || currentUser.getId() <= 0) {
             JOptionPane.showMessageDialog(this,
                     "You must be logged in to place an order.\nPlease log out and log in again.",
@@ -486,30 +688,30 @@ public class OrderPanel extends JPanel {
         }
 
         try {
-            // Determine restaurant (all items must be from the same restaurant)
-            Set<Integer> restaurantIds = new HashSet<>();
-            for (OrderItemRequest item : orderItems) {
-                MenuItemResponse menuItem = menuItemCache.get(item.getMenuItemId());
-                if (menuItem != null) {
-                    restaurantIds.add(menuItem.getRestaurant());
-                }
-            }
-
-            if (restaurantIds.size() != 1) {
+            // FIX: Use stored restaurant ID
+            if (selectedRestaurantId <= 0) {
                 JOptionPane.showMessageDialog(this,
-                        "All items must be from the same restaurant!",
-                        "Multiple Restaurants", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int restaurantId = restaurantIds.iterator().next();
-            RestaurantResponse restaurant = findRestaurantById(restaurantId);
-
-            if (restaurant == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Restaurant not found in the database.",
+                        "No restaurant selected. Please add items from a valid restaurant.",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 return;
+            }
+
+            RestaurantResponse restaurant = findRestaurantById(selectedRestaurantId);
+            if (restaurant == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Restaurant not found in the database.\nRestaurant ID: " + selectedRestaurantId,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // FIX: Ensure each OrderItemRequest has valid data
+            for (OrderItemRequest item : orderItems) {
+                if (item.getMenuItemId() <= 0 || item.getQuantity() <= 0 || item.getPrice() <= 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid item data in cart. Please try again.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
 
             double total = calculateTotal();
@@ -539,20 +741,33 @@ public class OrderPanel extends JPanel {
 
             // Payment type
             String paymentType = (String) cbPaymentType.getSelectedItem();
-            // Extract type without extra text if needed – already clean
+            if (paymentType == null || paymentType.trim().isEmpty()) {
+                paymentType = "Credit Card";
+            }
 
-            // Create payment
+            // FIX: Create payment with proper values
             Payment payment = new Payment();
             payment.setAmount(total);
             payment.setType(paymentType.toUpperCase().replace(" ", "_"));
+            // If Payment has other required fields, set them here
 
-            // Create order request
+            // FIX: Create OrderItem objects for the request
+            List<OrderItem> orderItemEntities = new ArrayList<>();
+            for (OrderItemRequest itemReq : orderItems) {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setMenuItemId(itemReq.getMenuItemId());
+                orderItem.setQuantity(itemReq.getQuantity());
+                orderItem.setPrice(itemReq.getPrice());
+                orderItemEntities.add(orderItem);
+            }
+
+            // FIX: Create order request with all required fields
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setOrderDate(LocalDateTime.now());
             orderRequest.setTotalPrice(total);
             orderRequest.setUser(currentUser);
             orderRequest.setRestaurant(restaurant);
-            orderRequest.setOrderItems(orderItems);
+            orderRequest.setOrderItems(orderItems); // Using the existing List<OrderItemRequest>
             orderRequest.setPayment(payment);
 
             // Process order
@@ -560,15 +775,14 @@ public class OrderPanel extends JPanel {
 
             JOptionPane.showMessageDialog(this,
                     "<html><div style='font-size:14pt;'>" +
-                            "Order created successfully!<br><br>" +
-                            "Order # will be generated by database<br>" +
+                            "✅ Order created successfully!<br><br>" +
                             "Total: " + lblTotal.getText() + "<br>" +
                             "Payment: " + payment.getType() +
                             "</div></html>",
                     "Order Success", JOptionPane.INFORMATION_MESSAGE);
 
             // Clear cart and refresh
-            clearCart();
+            clearCartSilently();
             loadOrderHistory();
 
         } catch (MessageException ex) {
@@ -578,153 +792,12 @@ public class OrderPanel extends JPanel {
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "Unexpected error: " + ex.getMessage(),
+                    "Unexpected error: " + ex.getMessage() + "\n\nPlease check the console for details.",
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // ======================== OTHER METHODS (unchanged, but included for completeness) ========================
-
-    private void addItemToCart() {
-        try {
-            MenuItemResponse selectedItem = (MenuItemResponse) cbMenuItem.getSelectedItem();
-            if (selectedItem == null) {
-                JOptionPane.showMessageDialog(this, "Please select a menu item!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int quantity = (Integer) spnQuantity.getValue();
-            if (quantity <= 0) {
-                JOptionPane.showMessageDialog(this, "Quantity must be at least 1!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Check if already in cart
-            for (int i = 0; i < cartModel.getRowCount(); i++) {
-                if (cartModel.getValueAt(i, 0).equals(selectedItem.getId())) {
-                    int currentQty = (int) cartModel.getValueAt(i, 2);
-                    int newQty = currentQty + quantity;
-                    cartModel.setValueAt(newQty, i, 2);
-                    updateSubtotal(i);
-                    updateTotalAndRestaurant();
-                    for (OrderItemRequest item : orderItems) {
-                        if (item.getMenuItemId() == selectedItem.getId()) {
-                            item.setQuantity(newQty);
-                            break;
-                        }
-                    }
-                    JOptionPane.showMessageDialog(this,
-                            String.format("Updated quantity to %d x %s", newQty, selectedItem.getName()),
-                            "Item Updated", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-            }
-
-            double price = Double.parseDouble(selectedItem.getPrice());
-            double subtotal = price * quantity;
-            cartModel.addRow(new Object[]{
-                    selectedItem.getId(),
-                    selectedItem.getName(),
-                    quantity,
-                    String.format("$%.2f", price),
-                    String.format("$%.2f", subtotal)
-            });
-
-            OrderItemRequest orderItem = new OrderItemRequest();
-            orderItem.setMenuItemId(selectedItem.getId());
-            orderItem.setQuantity(quantity);
-            orderItem.setPrice(price);
-            orderItems.add(orderItem);
-
-            updateTotalAndRestaurant();
-            spnQuantity.setValue(1);
-            JOptionPane.showMessageDialog(this,
-                    String.format("Added %d x %s to cart!", quantity, selectedItem.getName()),
-                    "Item Added", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error adding item: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void removeSelectedItem() {
-        int selectedRow = cartTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an item to remove!", "No Selection", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "<html><div style='font-size:12pt;'>Remove this item from cart?</div></html>",
-                "Confirm Removal",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            int itemId = (int) cartModel.getValueAt(selectedRow, 0);
-            cartModel.removeRow(selectedRow);
-            orderItems.removeIf(item -> item.getMenuItemId() == itemId);
-            updateTotalAndRestaurant();
-        }
-    }
-
-    private void clearCart() {
-        if (cartModel.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "Cart is already empty!", "Info", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "<html><div style='font-size:12pt;'>Clear all items from cart?</div></html>",
-                "Confirm Clear",
-                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            cartModel.setRowCount(0);
-            orderItems.clear();
-            lblRestaurant.setText("Selected Restaurant: None");
-            lblTotal.setText("Total: $0.00");
-        }
-    }
-
-    private void updateSubtotal(int row) {
-        int quantity = (int) cartModel.getValueAt(row, 2);
-        String priceStr = cartModel.getValueAt(row, 3).toString().replace("$", "");
-        double price = Double.parseDouble(priceStr);
-        double subtotal = quantity * price;
-        cartModel.setValueAt(String.format("$%.2f", subtotal), row, 4);
-        int itemId = (int) cartModel.getValueAt(row, 0);
-        for (OrderItemRequest item : orderItems) {
-            if (item.getMenuItemId() == itemId) {
-                item.setQuantity(quantity);
-                break;
-            }
-        }
-    }
-
-    private void updateTotalAndRestaurant() {
-        double total = calculateTotal();
-        lblTotal.setText(String.format("Total: $%.2f", total));
-        if (!orderItems.isEmpty()) {
-            int firstItemId = orderItems.get(0).getMenuItemId();
-            MenuItemResponse firstItem = menuItemCache.get(firstItemId);
-            if (firstItem != null) {
-                RestaurantResponse restaurant = findRestaurantById(firstItem.getRestaurant());
-                if (restaurant != null) {
-                    lblRestaurant.setText("Selected Restaurant: " + restaurant.getName());
-                }
-            }
-        } else {
-            lblRestaurant.setText("Selected Restaurant: None");
-            btnRemoveItem.setEnabled(false);
-        }
-    }
-
-    private double calculateTotal() {
-        double total = 0;
-        for (int i = 0; i < cartModel.getRowCount(); i++) {
-            String subtotalStr = cartModel.getValueAt(i, 4).toString().replace("$", "");
-            total += Double.parseDouble(subtotalStr);
-        }
-        return total;
-    }
+    // ======================== OTHER METHODS (unchanged) ========================
 
     private void loadMenuItems() {
         try {
@@ -749,6 +822,9 @@ public class OrderPanel extends JPanel {
     private void loadOrderHistory() {
         try {
             orderHistoryModel.setRowCount(0);
+            if (currentUser == null || currentUser.getId() <= 0) {
+                return;
+            }
             List<OrderResponse> orders = orderService.findOrdersByUserId(currentUser.getId());
             int userOrderCount = 0;
             for (OrderResponse order : orders) {
@@ -767,9 +843,6 @@ public class OrderPanel extends JPanel {
                     });
                     userOrderCount++;
                 }
-            }
-            if (userOrderCount == 0) {
-                // Optional: show info but don't disturb user
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
@@ -849,7 +922,7 @@ public class OrderPanel extends JPanel {
         JTextArea textArea = new JTextArea();
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         textArea.setEditable(false);
-        textArea.setBackground(Color.WHITE);
+        textArea.setBackground(Color.decode("#FFF6EC"));
 
         StringBuilder details = new StringBuilder();
         details.append("╔══════════════════════════════════════╗\n");
@@ -893,7 +966,7 @@ public class OrderPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton btnClose = new JButton("Close");
+        JButton btnClose = UITheme.createButton("Close", UITheme.NEUTRAL);
         btnClose.addActionListener(e -> dialog.dispose());
         buttonPanel.add(btnClose);
 
@@ -908,25 +981,7 @@ public class OrderPanel extends JPanel {
     }
 
     private JButton createIconButton(String text, Color color, int fontSize) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-        return button;
+        return UITheme.createButton(text, color);
     }
 
     // Custom renderers
@@ -939,11 +994,11 @@ public class OrderPanel extends JPanel {
                 MenuItemResponse item = (MenuItemResponse) value;
                 setText(String.format("%s - $%s", item.getName(), item.getPrice()));
                 if (isSelected) {
-                    setBackground(Color.decode("#3498db"));
+                    setBackground(Color.decode("#FF9F45"));
                     setForeground(Color.WHITE);
                 } else {
-                    if (index % 2 == 0) setBackground(Color.WHITE);
-                    else setBackground(new Color(240, 248, 255));
+                    if (index % 2 == 0) setBackground(Color.decode("#FFF6EC"));
+                    else setBackground(new Color(255, 244, 230));
                     setForeground(Color.BLACK);
                 }
             }

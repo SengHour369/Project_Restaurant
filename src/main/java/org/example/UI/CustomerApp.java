@@ -19,18 +19,15 @@ public class CustomerApp extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.decode("#3498db"));
+        headerPanel.setBackground(Color.decode("#FF9F45"));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        JLabel welcomeLabel = new JLabel("Welcome, " + currentUser.getName() + "!");
+        JLabel welcomeLabel = new JLabel("👋 Welcome, " + currentUser.getName() + "!");
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         welcomeLabel.setForeground(Color.WHITE);
         headerPanel.add(welcomeLabel, BorderLayout.WEST);
 
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.setBackground(Color.decode("#e74c3c"));
-        btnLogout.setForeground(Color.WHITE);
-        btnLogout.setFocusPainted(false);
+        JButton btnLogout = UITheme.createButton("👋 Logout", UITheme.SECONDARY);
         btnLogout.addActionListener(e -> {
             new LoginFrame().setVisible(true);
             dispose();
@@ -40,9 +37,9 @@ public class CustomerApp extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        tabbedPane.addTab("Place Order", new OrderPanel(currentUser));
-        tabbedPane.addTab("Order History", new OrderHistoryPanel(currentUser));
-        tabbedPane.addTab("My Profile", new UserPanel(currentUser));
+        tabbedPane.addTab("🍕 Place Order", new OrderPanel(currentUser));
+        tabbedPane.addTab("🧾 Order History", new OrderHistoryPanel(currentUser));
+        tabbedPane.addTab("👤 My Profile", new UserPanel(currentUser));
 
         setLayout(new BorderLayout());
         add(headerPanel, BorderLayout.NORTH);

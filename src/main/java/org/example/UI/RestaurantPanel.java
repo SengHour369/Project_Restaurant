@@ -72,7 +72,7 @@ public class RestaurantPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(Color.decode("#FFF6EC"));
 
         // Make it full screen
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -129,34 +129,31 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#f8f9fa"));
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#3498db")),
+                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#FF9F45")),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
         // Title
-        JLabel titleLabel = new JLabel("Restaurant Management");
+        JLabel titleLabel = new JLabel("🏪 Restaurant Management");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
-        titleLabel.setForeground(Color.decode("#2c3e50"));
+        titleLabel.setForeground(Color.decode("#6B4226"));
 
         // Search panel
         JPanel searchPanel = new JPanel(new BorderLayout(15, 0));
-        searchPanel.setBackground(Color.decode("#f8f9fa"));
+        searchPanel.setBackground(Color.decode("#FFF6EC"));
 
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        searchLabel.setForeground(Color.decode("#2c3e50"));
+        searchLabel.setForeground(Color.decode("#6B4226"));
 
         txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#3498db"), 2),
-                BorderFactory.createEmptyBorder(12, 20, 12, 20)
-        ));
+        txtSearch.setBorder(new UITheme.RoundedLineBorder(UITheme.PRIMARY, 16, 12, 20));
         txtSearch.setPreferredSize(new Dimension(400, 45));
         txtSearch.setToolTipText("Search by name, category, location...");
 
-        JButton btnClearSearch = createIconButton("Clear", Color.decode("#e74c3c"), 16);
+        JButton btnClearSearch = createIconButton("Clear", Color.decode("#FF6B5B"), 16);
         btnClearSearch.setToolTipText("Clear search");
         btnClearSearch.addActionListener(e -> {
             txtSearch.setText("");
@@ -176,13 +173,13 @@ public class RestaurantPanel extends JPanel {
     private JPanel createFormPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(null);
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
         // Form title
-        JLabel formTitle = new JLabel("Add/Edit Restaurant");
+        JLabel formTitle = new JLabel("✏️ Add/Edit Restaurant");
         formTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        formTitle.setForeground(Color.decode("#2c3e50"));
+        formTitle.setForeground(Color.decode("#6B4226"));
         formTitle.setBounds(20, 20, 400, 40);
         panel.add(formTitle);
 
@@ -202,12 +199,12 @@ public class RestaurantPanel extends JPanel {
         JLabel lblCategory = new JLabel("Category:");
         lblCategory.setBounds(20, yPos, labelWidth, 35);
         lblCategory.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblCategory.setForeground(Color.decode("#2c3e50"));
+        lblCategory.setForeground(Color.decode("#6B4226"));
         panel.add(lblCategory);
 
         txtCategory.setBounds(20 + labelWidth + 10, yPos, fieldWidth - labelWidth - 30, 35);
         txtCategory.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtCategory.setBackground(Color.WHITE);
+        txtCategory.setBackground(Color.decode("#FFF6EC"));
         panel.add(txtCategory);
         yPos += 55;
 
@@ -215,7 +212,7 @@ public class RestaurantPanel extends JPanel {
         JLabel lblRating = new JLabel("Rating:");
         lblRating.setBounds(20, yPos, labelWidth, 35);
         lblRating.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblRating.setForeground(Color.decode("#2c3e50"));
+        lblRating.setForeground(Color.decode("#6B4226"));
         panel.add(lblRating);
 
         txtRating.setBounds(20 + labelWidth + 10, yPos, 200, 35);
@@ -223,12 +220,12 @@ public class RestaurantPanel extends JPanel {
         txtRating.setPaintTicks(true);
         txtRating.setPaintLabels(true);
         txtRating.setSnapToTicks(true);
-        txtRating.setBackground(Color.WHITE);
+        txtRating.setBackground(Color.decode("#FFF6EC"));
         panel.add(txtRating);
 
         lblRatingValue.setBounds(20 + labelWidth + 10 + 210, yPos, 80, 35);
         lblRatingValue.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblRatingValue.setForeground(Color.decode("#f39c12"));
+        lblRatingValue.setForeground(Color.decode("#FFB627"));
         panel.add(lblRatingValue);
         yPos += 55;
 
@@ -243,12 +240,12 @@ public class RestaurantPanel extends JPanel {
         // Buttons panel
         JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 15, 15));
         buttonPanel.setBounds(20, yPos, fieldWidth + 10, 110);
-        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBackground(Color.decode("#FFF6EC"));
 
-        btnAdd = createStyledButton("Add Restaurant", Color.decode("#2ecc71"));
-        btnUpdate = createStyledButton("Update", Color.decode("#3498db"));
-        btnDelete = createStyledButton("Delete", Color.decode("#e74c3c"));
-        btnClear = createStyledButton("Clear", Color.decode("#95a5a6"));
+        btnAdd = createStyledButton("Add Restaurant", Color.decode("#6FCF97"));
+        btnUpdate = createStyledButton("Update", Color.decode("#FF9F45"));
+        btnDelete = createStyledButton("Delete", Color.decode("#FF6B5B"));
+        btnClear = createStyledButton("Clear", Color.decode("#D8A48F"));
 
         // Make buttons larger
         Dimension buttonSize = new Dimension(180, 45);
@@ -269,18 +266,18 @@ public class RestaurantPanel extends JPanel {
         JLabel quickActions = new JLabel("Quick Actions:");
         quickActions.setBounds(20, yPos, 150, 30);
         quickActions.setFont(new Font("SansSerif", Font.BOLD, 16));
-        quickActions.setForeground(Color.decode("#2c3e50"));
+        quickActions.setForeground(Color.decode("#6B4226"));
         panel.add(quickActions);
 
         JPanel quickButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         quickButtons.setBounds(180, yPos, fieldWidth - 160, 35);
-        quickButtons.setBackground(Color.WHITE);
+        quickButtons.setBackground(Color.decode("#FFF6EC"));
 
-        JButton btnRefresh = createIconButton("Refresh", Color.decode("#9b59b6"), 14);
+        JButton btnRefresh = createIconButton("Refresh", Color.decode("#E07A5F"), 14);
         btnRefresh.setToolTipText("Refresh List");
-        JButton btnViewDetails = createIconButton("Details", Color.decode("#1abc9c"), 14);
+        JButton btnViewDetails = createIconButton("Details", Color.decode("#4CB963"), 14);
         btnViewDetails.setToolTipText("View Details");
-        JButton btnCopyPhone = createIconButton("Copy Phone", Color.decode("#f39c12"), 14);
+        JButton btnCopyPhone = createIconButton("Copy Phone", Color.decode("#FFB627"), 14);
         btnCopyPhone.setToolTipText("Copy Phone");
 
         btnRefresh.addActionListener(e -> refreshRestaurants());
@@ -302,7 +299,7 @@ public class RestaurantPanel extends JPanel {
                 "• Press Enter to navigate fields</div></html>");
         tipsLabel.setBounds(20, yPos, fieldWidth + 10, 80);
         tipsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        tipsLabel.setForeground(Color.decode("#7f8c8d"));
+        tipsLabel.setForeground(Color.decode("#A67B5B"));
         tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(tipsLabel);
 
@@ -311,20 +308,20 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 30));
 
         // Table header
         JPanel tableHeader = new JPanel(new BorderLayout());
-        tableHeader.setBackground(Color.WHITE);
+        tableHeader.setBackground(Color.decode("#FFF6EC"));
         tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        JLabel tableTitle = new JLabel("Restaurants List");
+        JLabel tableTitle = new JLabel("📋 Restaurants List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        tableTitle.setForeground(Color.decode("#2c3e50"));
+        tableTitle.setForeground(Color.decode("#6B4226"));
 
         lblSelectedInfo.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        lblSelectedInfo.setForeground(Color.decode("#7f8c8d"));
+        lblSelectedInfo.setForeground(Color.decode("#A67B5B"));
 
         tableHeader.add(tableTitle, BorderLayout.WEST);
         tableHeader.add(lblSelectedInfo, BorderLayout.EAST);
@@ -332,7 +329,7 @@ public class RestaurantPanel extends JPanel {
         // Configure table
         restaurantTable.setRowHeight(45);
         restaurantTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-        restaurantTable.getTableHeader().setBackground(Color.decode("#34495e"));
+        restaurantTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
         restaurantTable.getTableHeader().setForeground(Color.WHITE);
         restaurantTable.getTableHeader().setPreferredSize(new Dimension(0, 50));
         restaurantTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -354,18 +351,18 @@ public class RestaurantPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.WHITE);
+                        c.setBackground(Color.decode("#FFF6EC"));
                     } else {
-                        c.setBackground(new Color(240, 248, 255));
+                        c.setBackground(new Color(255, 244, 230));
                     }
                 } else {
-                    c.setBackground(new Color(220, 240, 255));
+                    c.setBackground(new Color(255, 224, 178));
                     c.setForeground(Color.BLACK);
                 }
 
                 // Style rating column
                 if (column == 3 && value != null) {
-                    setForeground(Color.decode("#f39c12")); // Orange for rating
+                    setForeground(Color.decode("#FFB627")); // Orange for rating
                     setFont(getFont().deriveFont(Font.BOLD));
                 }
 
@@ -383,7 +380,7 @@ public class RestaurantPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(restaurantTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.decode("#FFF6EC"));
 
         panel.add(tableHeader, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -393,17 +390,17 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel createStatsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
-        panel.setBackground(Color.decode("#f1f8ff"));
+        panel.setBackground(Color.decode("#FFF1E0"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#3498db")),
+                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#FF9F45")),
                 BorderFactory.createEmptyBorder(15, 30, 15, 30)
         ));
 
         lblTotalRestaurants.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalRestaurants.setForeground(Color.decode("#2c3e50"));
+        lblTotalRestaurants.setForeground(Color.decode("#6B4226"));
 
         lblAvgRating.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblAvgRating.setForeground(Color.decode("#f39c12"));
+        lblAvgRating.setForeground(Color.decode("#FFB627"));
 
         panel.add(lblTotalRestaurants);
         panel.add(lblAvgRating);
@@ -457,9 +454,9 @@ public class RestaurantPanel extends JPanel {
                             txtCategory.setSelectedItem(category);
 
                             // Show animation
-                            txtCategory.setBackground(new Color(220, 237, 255));
+                            txtCategory.setBackground(new Color(255, 224, 178));
                             Timer timer = new Timer(1000, evt -> {
-                                txtCategory.setBackground(Color.WHITE);
+                                txtCategory.setBackground(Color.decode("#FFF6EC"));
                             });
                             timer.setRepeats(false);
                             timer.start();
@@ -764,12 +761,12 @@ public class RestaurantPanel extends JPanel {
 
     private Color getRatingColor(int rating) {
         switch (rating) {
-            case 5: return Color.decode("#27ae60"); // Green
-            case 4: return Color.decode("#2ecc71"); // Light Green
-            case 3: return Color.decode("#f39c12"); // Orange
-            case 2: return Color.decode("#e67e22"); // Dark Orange
-            case 1: return Color.decode("#e74c3c"); // Red
-            default: return Color.decode("#95a5a6"); // Gray
+            case 5: return Color.decode("#5FAD56"); // Green
+            case 4: return Color.decode("#6FCF97"); // Light Green
+            case 3: return Color.decode("#FFB627"); // Orange
+            case 2: return Color.decode("#FF8C42"); // Dark Orange
+            case 1: return Color.decode("#FF6B5B"); // Red
+            default: return Color.decode("#D8A48F"); // Gray
         }
     }
 
@@ -848,64 +845,20 @@ public class RestaurantPanel extends JPanel {
         JLabel lbl = new JLabel(label);
         lbl.setBounds(x, y, labelWidth, 35);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lbl.setForeground(Color.decode("#2c3e50"));
+        lbl.setForeground(Color.decode("#6B4226"));
         panel.add(lbl);
 
         field.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
         field.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
+        field.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 8, 15));
         panel.add(field);
     }
 
     private JButton createStyledButton(String text, Color color) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.BOLD, 14));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(12, 25, 12, 25)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
+        return UITheme.createButton(text, color);
     }
 
     private JButton createIconButton(String text, Color color, int fontSize) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
+        return UITheme.createButton(text, color);
     }
 }

@@ -21,16 +21,16 @@ public class AdminDashboard extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.decode("#2c3e50"));
+        headerPanel.setBackground(Color.decode("#6B4226"));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        JLabel welcomeLabel = new JLabel("Welcome, " + currentAdmin.getName() + "!");
+        JLabel welcomeLabel = new JLabel("👋 Welcome, " + currentAdmin.getName() + "!");
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         welcomeLabel.setForeground(Color.WHITE);
         headerPanel.add(welcomeLabel, BorderLayout.WEST);
 
         JPanel userInfoPanel = new JPanel(new BorderLayout());
-        userInfoPanel.setBackground(Color.decode("#2c3e50"));
+        userInfoPanel.setBackground(Color.decode("#6B4226"));
         userInfoPanel.setOpaque(false);
 
         JLabel roleLabel = new JLabel("Administrator");
@@ -38,25 +38,7 @@ public class AdminDashboard extends JFrame {
         roleLabel.setForeground(Color.LIGHT_GRAY);
         roleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnLogout.setBackground(Color.decode("#e74c3c"));
-        btnLogout.setForeground(Color.WHITE);
-        btnLogout.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#c0392b"), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)
-        ));
-        btnLogout.setFocusPainted(false);
-        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btnLogout.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnLogout.setBackground(Color.decode("#c0392b"));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnLogout.setBackground(Color.decode("#e74c3c"));
-            }
-        });
+        JButton btnLogout = UITheme.createButton("👋 Logout", UITheme.SECONDARY);
 
         btnLogout.addActionListener(new ActionListener() {
             @Override
@@ -71,8 +53,8 @@ public class AdminDashboard extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("SansSerif", Font.BOLD, 14));
-        tabbedPane.setBackground(Color.WHITE);
-        tabbedPane.setForeground(Color.decode("#2c3e50"));
+        tabbedPane.setBackground(Color.decode("#FFF6EC"));
+        tabbedPane.setForeground(Color.decode("#6B4226"));
 
         UserPanel userPanel = new UserPanel(currentAdmin);
         RestaurantPanel restaurantPanel = new RestaurantPanel();
@@ -80,11 +62,11 @@ public class AdminDashboard extends JFrame {
         AdminOrderPanel orderPanel = new AdminOrderPanel();
         PaymentPanel paymentPanel = new PaymentPanel();
 
-        tabbedPane.addTab("Users", userPanel);
-        tabbedPane.addTab("Restaurants", restaurantPanel);
-        tabbedPane.addTab("Menu Items", menuItemPanel);
-        tabbedPane.addTab("Orders", orderPanel);
-        tabbedPane.addTab("Payments", paymentPanel);
+        tabbedPane.addTab("👤 Users", userPanel);
+        tabbedPane.addTab("🏪 Restaurants", restaurantPanel);
+        tabbedPane.addTab("🍔 Menu Items", menuItemPanel);
+        tabbedPane.addTab("🧾 Orders", orderPanel);
+        tabbedPane.addTab("💳 Payments", paymentPanel);
 
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
             JLabel tabLabel = new JLabel(tabbedPane.getTitleAt(i));
@@ -98,7 +80,7 @@ public class AdminDashboard extends JFrame {
         add(tabbedPane, BorderLayout.CENTER);
 
         JPanel statusPanel = new JPanel(new BorderLayout());
-        statusPanel.setBackground(Color.decode("#34495e"));
+        statusPanel.setBackground(Color.decode("#8B5E3C"));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
 
         JLabel statusLabel = new JLabel("System Ready | Admin ID: " + currentAdmin.getId());
@@ -227,17 +209,5 @@ public class AdminDashboard extends JFrame {
                 "<b>Tip:</b> Double-click items in tables to edit them.</div></html>";
         JOptionPane.showMessageDialog(this, helpText,
                 "Help - Admin Dashboard", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            UserResponse testAdmin = new UserResponse();
-            testAdmin.setId(1);
-            testAdmin.setName("Admin User");
-            testAdmin.setEmail("admin@example.com");
-            testAdmin.setStatus("ADMIN");
-            AdminDashboard dashboard = new AdminDashboard(testAdmin);
-            dashboard.setVisible(true);
-        });
     }
 }

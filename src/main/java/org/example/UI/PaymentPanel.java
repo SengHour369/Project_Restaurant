@@ -6,6 +6,7 @@ import org.example.Service.ServiceImplement.ServicePaymentImp;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.Font;
 import java.util.List;
 
 public class PaymentPanel extends JPanel {
@@ -23,20 +24,27 @@ public class PaymentPanel extends JPanel {
     public PaymentPanel() {
         setLayout(null);
         setBounds(0,0,800,500);
+        setBackground(UITheme.BACKGROUND);
 
-        addLabel("ID",10,10); addField(txtId,120,10);
-        addLabel("Type",10,40); addField(txtType,120,40);
-        addLabel("Amount",10,70); addField(txtAmount,120,70);
+        JLabel title = new JLabel("💳 Payments");
+        title.setFont(UITheme.FONT_TITLE);
+        title.setForeground(UITheme.TEXT_DARK);
+        title.setBounds(10, 10, 300, 30);
+        add(title);
 
-        JButton btnAdd = new JButton("Add");
-        JButton btnUpdate = new JButton("Update");
-        JButton btnDelete = new JButton("Delete");
-        JButton btnLoad = new JButton("Load");
+        addLabel("ID",10,60); addField(txtId,120,60);
+        addLabel("Type",10,90); addField(txtType,120,90);
+        addLabel("Amount",10,120); addField(txtAmount,120,120);
 
-        btnAdd.setBounds(10,110,80,30);
-        btnUpdate.setBounds(100,110,80,30);
-        btnDelete.setBounds(190,110,80,30);
-        btnLoad.setBounds(280,110,80,30);
+        JButton btnAdd = UITheme.createButton("Add", UITheme.SUCCESS);
+        JButton btnUpdate = UITheme.createButton("Update", UITheme.PRIMARY);
+        JButton btnDelete = UITheme.createButton("Delete", UITheme.SECONDARY);
+        JButton btnLoad = UITheme.createButton("Load", UITheme.NEUTRAL);
+
+        btnAdd.setBounds(10,160,80,35);
+        btnUpdate.setBounds(100,160,80,35);
+        btnDelete.setBounds(190,160,80,35);
+        btnLoad.setBounds(280,160,80,35);
 
         add(btnAdd); add(btnUpdate); add(btnDelete); add(btnLoad);
 
@@ -86,11 +94,14 @@ public class PaymentPanel extends JPanel {
     private void addLabel(String text, int x, int y){
         JLabel l = new JLabel(text);
         l.setBounds(x, y, 100, 25);
+        l.setForeground(UITheme.TEXT_DARK);
+        l.setFont(UITheme.FONT_BODY.deriveFont(Font.BOLD));
         add(l);
     }
 
     private void addField(JTextField f, int x, int y){
-        f.setBounds(x, y, 200, 25);
+        f.setBounds(x, y, 200, 28);
+        UITheme.styleField(f);
         add(f);
     }
 }

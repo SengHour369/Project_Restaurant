@@ -22,15 +22,15 @@ public class ServiceUserImp implements ServiceUser {
 //        userServiceHandler.HasValidUsername(r.getName());
         String sql = """
             INSERT INTO users
-            (name, gender, date_of_birth, phone_number, address, email, password, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (name, gender, date_of_birth, phone_number, address, email, password_hash, status)
+            VALUES (?, ?::user_gender, ?::date, ?, ?, ?, ?, ?::user_status)
         """;
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, r.getName());
-            ps.setString(2, r.getGender());
-            ps.setString(3, r.getDateOfBirth());
+            ps.setString(2, blankToNull(r.getGender()));
+            ps.setString(3, blankToNull(r.getDateOfBirth()));
             ps.setString(4, r.getPhone());
             ps.setString(5, r.getAddress());
             ps.setString(6, r.getEmail());
@@ -39,7 +39,7 @@ public class ServiceUserImp implements ServiceUser {
             ps.executeUpdate();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new MessageException("Could not create user: " + e.getMessage(), e);
         }
     }
 
@@ -47,8 +47,8 @@ public class ServiceUserImp implements ServiceUser {
     public void update(int id, UserRequest r) {
         String sql = """
             UPDATE users SET
-            name=?, gender=?, date_of_birth=?, phone_number=?,
-            address=?, email=?, password=?, status=?
+            name=?, gender=?::user_gender, date_of_birth=?::date, phone_number=?,
+            address=?, email=?, password_hash=?, status=?::user_status
             WHERE id=?
         """;
 
@@ -56,8 +56,8 @@ public class ServiceUserImp implements ServiceUser {
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, r.getName());
-            ps.setString(2, r.getGender());
-            ps.setString(3, r.getDateOfBirth());
+            ps.setString(2, blankToNull(r.getGender()));
+            ps.setString(3, blankToNull(r.getDateOfBirth()));
             ps.setString(4, r.getPhone());
             ps.setString(5, r.getAddress());
             ps.setString(6, r.getEmail());
@@ -120,7 +120,7 @@ public class ServiceUserImp implements ServiceUser {
 
     @Override
     public UserResponse login(String username, String password) {
-        String sql = "SELECT * FROM users WHERE email=? AND password=?";
+        String sql = "SELECT * FROM users WHERE email=? AND password_hash=?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -134,6 +134,10 @@ public class ServiceUserImp implements ServiceUser {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value;
     }
 
     private UserResponse map(ResultSet rs) throws SQLException {

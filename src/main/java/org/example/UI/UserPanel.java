@@ -31,7 +31,7 @@ public class UserPanel extends JPanel {
     private final JTextField txtAddress = createTextField(true, "");
     private final JTextField txtEmail = createTextField(true, "");
     private final JPasswordField txtPassword = createPasswordField();
-    private final JComboBox<String> txtStatus = new JComboBox<>(new String[]{"USER", "ADMIN", "INACTIVE"});
+    private final JComboBox<String> txtStatus = new JComboBox<>(new String[]{"Active", "Admin", "Inactive", "Suspended"});
 
     // Search field
     private final JTextField txtSearch = new JTextField();
@@ -72,7 +72,7 @@ public class UserPanel extends JPanel {
 
     public UserPanel(UserResponse currentUser) {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(Color.decode("#FFF6EC"));
 
         initializeUI();
         setupEventListeners();
@@ -142,35 +142,32 @@ public class UserPanel extends JPanel {
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#f8f9fa"));
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#3498db")),
+                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#FF9F45")),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
-        JLabel titleLabel = new JLabel("User Management System");
+        JLabel titleLabel = new JLabel("👤 User Management System");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
-        titleLabel.setForeground(Color.decode("#2c3e50"));
+        titleLabel.setForeground(Color.decode("#6B4226"));
 
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
-        searchPanel.setBackground(Color.decode("#f8f9fa"));
+        searchPanel.setBackground(Color.decode("#FFF6EC"));
 
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        searchLabel.setForeground(Color.decode("#2c3e50"));
+        searchLabel.setForeground(Color.decode("#6B4226"));
 
         txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.decode("#3498db"), 2),
-                BorderFactory.createEmptyBorder(12, 15, 12, 15)
-        ));
+        txtSearch.setBorder(new UITheme.RoundedLineBorder(UITheme.PRIMARY, 16, 12, 15));
         txtSearch.setPreferredSize(new Dimension(350, 45));
         txtSearch.setToolTipText("Search by name, email, phone, address, or status...");
 
-        btnSearchBtn = createIconButton("Search", Color.decode("#3498db"), 16);
+        btnSearchBtn = createIconButton("Search", Color.decode("#FF9F45"), 16);
         btnSearchBtn.setToolTipText("Search");
 
-        JButton btnClearSearch = createIconButton("Clear", Color.decode("#e74c3c"), 16);
+        JButton btnClearSearch = createIconButton("Clear", Color.decode("#FF6B5B"), 16);
         btnClearSearch.setToolTipText("Clear search");
         btnClearSearch.addActionListener(e -> {
             txtSearch.setText("");
@@ -178,7 +175,7 @@ public class UserPanel extends JPanel {
         });
 
         JPanel searchButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        searchButtons.setBackground(Color.decode("#f8f9fa"));
+        searchButtons.setBackground(Color.decode("#FFF6EC"));
         searchButtons.add(btnSearchBtn);
         searchButtons.add(btnClearSearch);
 
@@ -195,12 +192,12 @@ public class UserPanel extends JPanel {
     private JPanel createFormPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(null);
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        JLabel formTitle = new JLabel("Add / Edit User");
+        JLabel formTitle = new JLabel("✏️ Add / Edit User");
         formTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        formTitle.setForeground(Color.decode("#2c3e50"));
+        formTitle.setForeground(Color.decode("#6B4226"));
         formTitle.setBounds(20, 20, 400, 40);
         panel.add(formTitle);
 
@@ -219,7 +216,7 @@ public class UserPanel extends JPanel {
 
         addFormField("Date of Birth:", txtDob, 20, yPos, labelWidth, fieldWidth, panel);
 
-        JButton btnDatePicker = createIconButton("Pick", Color.decode("#9b59b6"), 14);
+        JButton btnDatePicker = createIconButton("Pick", Color.decode("#E07A5F"), 14);
         btnDatePicker.setBounds(20 + labelWidth + fieldWidth - 170, yPos, 60, 35);
         btnDatePicker.setToolTipText("Click for date picker");
         btnDatePicker.addActionListener(e -> showSimpleDatePickerDialog());
@@ -244,18 +241,15 @@ public class UserPanel extends JPanel {
         JLabel lblPassword = new JLabel("Password:");
         lblPassword.setBounds(20, yPos, labelWidth, 30);
         lblPassword.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblPassword.setForeground(Color.decode("#2c3e50"));
+        lblPassword.setForeground(Color.decode("#6B4226"));
         panel.add(lblPassword);
 
         txtPassword.setBounds(20 + labelWidth + 10, yPos, fieldWidth - labelWidth - 80, 35);
         txtPassword.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtPassword.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
+        txtPassword.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 8, 15));
         panel.add(txtPassword);
 
-        JButton btnShowPassword = createIconButton("Show", Color.decode("#7f8c8d"), 14);
+        JButton btnShowPassword = createIconButton("Show", Color.decode("#A67B5B"), 14);
         btnShowPassword.setBounds(20 + labelWidth + fieldWidth - 70, yPos, 60, 35);
         btnShowPassword.setToolTipText("Show/Hide Password");
         btnShowPassword.addActionListener(e -> togglePasswordVisibility(btnShowPassword));
@@ -267,13 +261,13 @@ public class UserPanel extends JPanel {
 
         JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 15, 15));
         buttonPanel.setBounds(20, yPos, fieldWidth, 110);
-        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBackground(Color.decode("#FFF6EC"));
 
-        btnAdd = createStyledButton("Add User", Color.decode("#2ecc71"));
-        btnUpdate = createStyledButton("Update", Color.decode("#3498db"));
-        btnDelete = createStyledButton("Delete", Color.decode("#e74c3c"));
-        btnClear = createStyledButton("Clear", Color.decode("#95a5a6"));
-        btnRefresh = createStyledButton("Refresh", Color.decode("#9b59b6"));
+        btnAdd = createStyledButton("Add User", Color.decode("#6FCF97"));
+        btnUpdate = createStyledButton("Update", Color.decode("#FF9F45"));
+        btnDelete = createStyledButton("Delete", Color.decode("#FF6B5B"));
+        btnClear = createStyledButton("Clear", Color.decode("#D8A48F"));
+        btnRefresh = createStyledButton("Refresh", Color.decode("#E07A5F"));
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
@@ -285,7 +279,7 @@ public class UserPanel extends JPanel {
 
         yPos += 120;
 
-        JLabel tipsLabel = new JLabel("<html><div style='text-align: center; color: #7f8c8d; font-size: 12px;'>" +
+        JLabel tipsLabel = new JLabel("<html><div style='text-align: center; color: #A67B5B; font-size: 12px;'>" +
                 "Quick Tips: Double-click row to edit | Ctrl+F to search | F5 to refresh | Delete to remove</div></html>");
         tipsLabel.setBounds(20, yPos, fieldWidth, 40);
         panel.add(tipsLabel);
@@ -299,12 +293,12 @@ public class UserPanel extends JPanel {
         JLabel lbl = new JLabel(label);
         lbl.setBounds(x, y, labelWidth, 30);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lbl.setForeground(Color.decode("#2c3e50"));
+        lbl.setForeground(Color.decode("#6B4226"));
         panel.add(lbl);
 
         comboBox.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
         comboBox.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        comboBox.setBackground(Color.WHITE);
+        comboBox.setBackground(Color.decode("#FFF6EC"));
         panel.add(comboBox);
     }
 
@@ -374,26 +368,26 @@ public class UserPanel extends JPanel {
 
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.decode("#FFF6EC"));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 30));
 
         JPanel tableHeader = new JPanel(new BorderLayout());
-        tableHeader.setBackground(Color.WHITE);
+        tableHeader.setBackground(Color.decode("#FFF6EC"));
         tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        JLabel tableTitle = new JLabel("All Users List");
+        JLabel tableTitle = new JLabel("📋 All Users List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        tableTitle.setForeground(Color.decode("#2c3e50"));
+        tableTitle.setForeground(Color.decode("#6B4226"));
 
         lblSelectedInfo.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        lblSelectedInfo.setForeground(Color.decode("#7f8c8d"));
+        lblSelectedInfo.setForeground(Color.decode("#A67B5B"));
 
         tableHeader.add(tableTitle, BorderLayout.WEST);
         tableHeader.add(lblSelectedInfo, BorderLayout.EAST);
 
         userTable.setRowHeight(45);
         userTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-        userTable.getTableHeader().setBackground(Color.decode("#34495e"));
+        userTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
         userTable.getTableHeader().setForeground(Color.WHITE);
         userTable.getTableHeader().setPreferredSize(new Dimension(0, 50));
         userTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -412,24 +406,24 @@ public class UserPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.WHITE);
+                        c.setBackground(Color.decode("#FFF6EC"));
                     } else {
-                        c.setBackground(new Color(240, 248, 255));
+                        c.setBackground(new Color(255, 244, 230));
                     }
                 } else {
-                    c.setBackground(new Color(52, 152, 219, 100));
+                    c.setBackground(new Color(255, 159, 69, 100));
                     c.setForeground(Color.BLACK);
                 }
 
                 if (column == 7) {
                     String status = value.toString();
                     if (status.contains("ADMIN")) {
-                        setForeground(Color.decode("#e74c3c"));
+                        setForeground(Color.decode("#FF6B5B"));
                         setFont(getFont().deriveFont(Font.BOLD));
-                    } else if (status.contains("INACTIVE")) {
-                        setForeground(Color.decode("#95a5a6"));
+                    } else if (status.contains("INACTIVE") || status.contains("SUSPENDED")) {
+                        setForeground(Color.decode("#D8A48F"));
                     } else {
-                        setForeground(Color.decode("#27ae60"));
+                        setForeground(Color.decode("#5FAD56"));
                     }
                 }
 
@@ -445,7 +439,7 @@ public class UserPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.decode("#FFF6EC"));
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         panel.add(tableHeader, BorderLayout.NORTH);
@@ -456,21 +450,21 @@ public class UserPanel extends JPanel {
 
     private JPanel createStatsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
-        panel.setBackground(Color.decode("#f1f8ff"));
+        panel.setBackground(Color.decode("#FFF1E0"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#3498db")),
+                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#FF9F45")),
                 BorderFactory.createEmptyBorder(15, 30, 15, 30)
         ));
 
         lblTotalUsers.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalUsers.setForeground(Color.decode("#2c3e50"));
+        lblTotalUsers.setForeground(Color.decode("#6B4226"));
 
         lblAdmins.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblAdmins.setForeground(Color.decode("#e74c3c"));
+        lblAdmins.setForeground(Color.decode("#FF6B5B"));
 
         JLabel lblActive = new JLabel("Active: 0");
         lblActive.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblActive.setForeground(Color.decode("#27ae60"));
+        lblActive.setForeground(Color.decode("#5FAD56"));
 
         panel.add(lblTotalUsers);
         panel.add(lblAdmins);
@@ -514,9 +508,9 @@ public class UserPanel extends JPanel {
                                     userTable.convertRowIndexToModel(row), 7).toString();
                             txtStatus.setSelectedItem(status);
 
-                            txtStatus.setBackground(new Color(220, 237, 255));
+                            txtStatus.setBackground(new Color(255, 224, 178));
                             Timer timer = new Timer(1000, evt -> {
-                                txtStatus.setBackground(Color.WHITE);
+                                txtStatus.setBackground(Color.decode("#FFF6EC"));
                             });
                             timer.setRepeats(false);
                             timer.start();
@@ -636,7 +630,7 @@ public class UserPanel extends JPanel {
         String dobText = txtDob.getText().trim();
 
         if (dobText.isEmpty()) {
-            txtDob.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+            txtDob.setBorder(new UITheme.RoundedLineBorder(Color.LIGHT_GRAY, 14, 8, 15));
             return;
         }
 
@@ -645,13 +639,13 @@ public class UserPanel extends JPanel {
             LocalDate today = LocalDate.now();
 
             if (dob.isAfter(today)) {
-                txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+                txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FF6B5B"), 14, 8, 15));
                 JOptionPane.showMessageDialog(this,
                         "Date of birth cannot be in the future!",
                         "Date Error", JOptionPane.WARNING_MESSAGE);
                 txtDob.requestFocus();
             } else if (dob.getYear() < 1900) {
-                txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+                txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FF6B5B"), 14, 8, 15));
                 JOptionPane.showMessageDialog(this,
                         "Date of birth must be after 1900!",
                         "Date Error", JOptionPane.WARNING_MESSAGE);
@@ -664,27 +658,27 @@ public class UserPanel extends JPanel {
                 }
 
                 if (age < 0) {
-                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+                    txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FF6B5B"), 14, 8, 15));
                     JOptionPane.showMessageDialog(this,
                             "Invalid date! Age cannot be negative.",
                             "Date Error", JOptionPane.WARNING_MESSAGE);
                     txtDob.requestFocus();
                 } else if (age < 13) {
-                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#f39c12"), 2));
+                    txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FFB627"), 14, 8, 15));
                     JOptionPane.showMessageDialog(this,
                             "User is under 13 years old (" + age + " years). Are you sure?",
                             "Age Warning", JOptionPane.WARNING_MESSAGE);
                 } else if (age > 150) {
-                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#f39c12"), 2));
+                    txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FFB627"), 14, 8, 15));
                     JOptionPane.showMessageDialog(this,
                             "User is over 150 years old (" + age + " years). Please verify.",
                             "Age Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#27ae60"), 2));
+                    txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#5FAD56"), 14, 8, 15));
                 }
             }
         } catch (DateTimeParseException e) {
-            txtDob.setBorder(BorderFactory.createLineBorder(Color.decode("#e74c3c"), 2));
+            txtDob.setBorder(new UITheme.RoundedLineBorder(Color.decode("#FF6B5B"), 14, 8, 15));
             String message;
             if (!dobText.matches("\\d{4}-\\d{2}-\\d{2}")) {
                 message = "Invalid date format!\nPlease use: YYYY-MM-DD\nExample: 1990-01-15";
@@ -851,7 +845,7 @@ public class UserPanel extends JPanel {
                 txtAddress.getText().trim(),
                 txtEmail.getText().trim(),
                 new String(txtPassword.getPassword()),
-                status != null ? status : "USER"
+                status != null ? status : "Active"
         );
     }
 
@@ -948,7 +942,7 @@ public class UserPanel extends JPanel {
         txtEmail.setText("");
         txtPassword.setText("");
         txtStatus.setSelectedIndex(0);
-        txtDob.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+        txtDob.setBorder(new UITheme.RoundedLineBorder(Color.LIGHT_GRAY, 14, 8, 15));
         lblSelectedInfo.setText("Select a user");
         userTable.clearSelection();
         tableSorter.setRowFilter(null);
@@ -973,63 +967,20 @@ public class UserPanel extends JPanel {
         JLabel lbl = new JLabel(label);
         lbl.setBounds(x, y, labelWidth, 30);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lbl.setForeground(Color.decode("#2c3e50"));
+        lbl.setForeground(Color.decode("#6B4226"));
         panel.add(lbl);
 
         field.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
         field.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
+        field.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 8, 15));
         panel.add(field);
     }
 
     private JButton createStyledButton(String text, Color color) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.BOLD, 14));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
+        return UITheme.createButton(text, color);
     }
 
     private JButton createIconButton(String text, Color color, int fontSize) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 2),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
+        return UITheme.createButton(text, color);
     }
 }

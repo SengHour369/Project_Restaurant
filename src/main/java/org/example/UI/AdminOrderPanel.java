@@ -24,8 +24,20 @@ public class AdminOrderPanel extends JPanel {
 
     private void setupPanel() {
         setLayout(null);
+        setBackground(UITheme.BACKGROUND);
+
+        JLabel title = new JLabel("🧾 All Orders");
+        title.setFont(UITheme.FONT_TITLE);
+        title.setForeground(UITheme.TEXT_DARK);
+        title.setBounds(10, 10, 300, 30);
+        add(title);
+
+        orderTable.setRowHeight(32);
+        orderTable.getTableHeader().setBackground(UITheme.NEUTRAL);
+        orderTable.getTableHeader().setForeground(java.awt.Color.WHITE);
+
         JScrollPane scrollPane = new JScrollPane(orderTable);
-        scrollPane.setBounds(10, 10, 800, 400);
+        scrollPane.setBounds(10, 50, 800, 400);
         add(scrollPane);
     }
 

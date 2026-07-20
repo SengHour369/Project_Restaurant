@@ -31,8 +31,8 @@ public class LoginFrame extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                Color color1 = Color.decode("#667eea");
-                Color color2 = Color.decode("#764ba2");
+                Color color1 = Color.decode("#FFB88C");
+                Color color2 = Color.decode("#FF6F59");
                 GradientPaint gp = new GradientPaint(0, 0, color1, getWidth(), getHeight(), color2);
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -45,7 +45,7 @@ public class LoginFrame extends JFrame {
         contentPanel.setOpaque(false);
         contentPanel.setBounds(50, 50, 350, 250);
 
-        JLabel titleLabel = new JLabel("Welcome Back!");
+        JLabel titleLabel = new JLabel("🍽️ Welcome Back!");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBounds(0, 0, 350, 40);
@@ -59,10 +59,7 @@ public class LoginFrame extends JFrame {
 
         txtusername.setBounds(130, 60, 180, 30);
         txtusername.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        txtusername.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.WHITE, 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+        txtusername.setBorder(new UITheme.RoundedLineBorder(Color.WHITE, 14, 5, 10));
         contentPanel.add(txtusername);
 
         JLabel lblPassword = new JLabel("Password:");
@@ -72,14 +69,11 @@ public class LoginFrame extends JFrame {
 
         txtPassword.setBounds(130, 100, 180, 30);
         txtPassword.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        txtPassword.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.WHITE, 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+        txtPassword.setBorder(new UITheme.RoundedLineBorder(Color.WHITE, 14, 5, 10));
         contentPanel.add(txtPassword);
 
-        btnLogin = createStyledButton("Login", Color.decode("#4CAF50"));
-        btnRegister = createStyledButton("Register", Color.decode("#2196F3"));
+        btnLogin = createStyledButton("Login", Color.decode("#6FCF97"));
+        btnRegister = createStyledButton("Register", Color.decode("#FF9F45"));
 
         btnLogin.setBounds(50, 150, 120, 35);
         btnRegister.setBounds(180, 150, 120, 35);
@@ -213,9 +207,9 @@ public class LoginFrame extends JFrame {
         registerDialog.add(userPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBackground(Color.decode("#FFF6EC"));
 
-        JButton btnClose = createStyledButton("Close", Color.decode("#95a5a6"));
+        JButton btnClose = createStyledButton("Close", Color.decode("#D8A48F"));
         btnClose.addActionListener(e -> registerDialog.dispose());
 
         bottomPanel.add(btnClose);
@@ -253,31 +247,6 @@ public class LoginFrame extends JFrame {
     }
 
     private JButton createStyledButton(String text, Color color) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("SansSerif", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 1),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-        return button;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            LoginFrame frame = new LoginFrame();
-            frame.setVisible(true);
-        });
+        return UITheme.createButton(text, color);
     }
 }
