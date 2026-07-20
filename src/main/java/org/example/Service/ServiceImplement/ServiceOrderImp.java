@@ -23,8 +23,6 @@ public class ServiceOrderImp implements ServiceOrder {
 
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) throws MessageException {
-        // No existence checks – the User and Restaurant are already valid objects from the database.
-        // We only validate they are not null.
         if (orderRequest.getUser() == null || orderRequest.getUser().getId() <= 0) {
             throw new MessageException("Invalid user: user ID is missing or zero.");
         }
@@ -35,21 +33,30 @@ public class ServiceOrderImp implements ServiceOrder {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
-            // Insert payment
+            // Get payment type exactly as provided (no conversion)
+            String paymentType = "Credit Card";
+            if (orderRequest.getPayment() != null && orderRequest.getPayment().getType() != null) {
+                String raw = orderRequest.getPayment().getType().trim();
+                if (!raw.isEmpty()) {
+                    paymentType = raw;
+                }
+            }
+
+            // Insert payment with explicit cast to enum
             String sqlPayment = """
                 INSERT INTO payments(amount, type)
-                VALUES (?,?) RETURNING id
+                VALUES (?, ?::payment_type) RETURNING id
             """;
             PreparedStatement psPay = conn.prepareStatement(sqlPayment);
             psPay.setDouble(1, orderRequest.getTotalPrice());
-            psPay.setString(2, "PAID");
+            psPay.setString(2, paymentType);
             ResultSet rsPay = psPay.executeQuery();
             rsPay.next();
             int paymentId = rsPay.getInt("id");
 
-            // Insert order
+            // ---------- FIX: Use restaurant_id (singular) ----------
             String sqlOrder = """
-                INSERT INTO orders(order_date, total_price, user_id, restaurants_id, payment_id)
+                INSERT INTO orders(order_date, total_price, user_id, restaurant_id, payment_id)
                 VALUES (?,?,?,?,?) RETURNING id
             """;
             PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
@@ -133,7 +140,8 @@ public class ServiceOrderImp implements ServiceOrder {
                     rsOrder.getTimestamp("order_date").toLocalDateTime();
             double total = rsOrder.getDouble("total_price");
             int userId = rsOrder.getInt("user_id");
-            int restaurantId = rsOrder.getInt("restaurants_id");
+            // ---------- FIX: Use restaurant_id ----------
+            int restaurantId = rsOrder.getInt("restaurant_id");
             int paymentId = rsOrder.getInt("payment_id");
 
             List<OrderItem> items = new ArrayList<>();

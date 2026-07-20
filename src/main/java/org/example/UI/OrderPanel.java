@@ -38,7 +38,10 @@ public class OrderPanel extends JPanel {
     private JButton btnRemoveItem = UITheme.createButton("Remove", UITheme.SECONDARY);
     private JButton btnClearAll = UITheme.createButton("Clear All", UITheme.NEUTRAL);
     private JButton btnCreateOrder = UITheme.createButton("Create Order", UITheme.SUCCESS);
-    private JComboBox<String> cbPaymentType = new JComboBox<>(new String[]{"Credit Card", "Cash", "Mobile Payment", "Debit Card"});
+    // FIX: ComboBox values exactly match PostgreSQL enum payment_type
+    private JComboBox<String> cbPaymentType = new JComboBox<>(new String[]{
+            "Cash", "Credit Card", "Debit Card", "Bank Transfer", "Mobile Wallet"
+    });
 
     private DefaultTableModel cartModel = new DefaultTableModel(
             new String[]{"ID", "Menu Item", "Quantity", "Price", "Subtotal"}, 0
@@ -66,7 +69,6 @@ public class OrderPanel extends JPanel {
     private JLabel lblTotal = new JLabel("Total: $0.00");
     private JSplitPane splitPane;
 
-    // FIX: Store restaurant ID separately to avoid repeated lookups
     private int selectedRestaurantId = -1;
 
     public OrderPanel(UserResponse user) {
@@ -77,6 +79,25 @@ public class OrderPanel extends JPanel {
         loadOrderHistory();
     }
 
+    // ======================== SAFE PRICE PARSING ========================
+    private double parsePriceSafely(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            throw new NumberFormatException("Price is null or empty");
+        }
+        String cleaned = raw.replaceAll("[^\\d.]", "");
+        if (cleaned.isEmpty()) {
+            throw new NumberFormatException("No numeric value found in: " + raw);
+        }
+        int firstDot = cleaned.indexOf('.');
+        if (firstDot != -1) {
+            String before = cleaned.substring(0, firstDot);
+            String after = cleaned.substring(firstDot + 1).replace(".", "");
+            cleaned = before + "." + after;
+        }
+        return Double.parseDouble(cleaned);
+    }
+
+    // ======================== UI INITIALIZATION ========================
     private void initializeUI() {
         setLayout(new BorderLayout());
         setBackground(Color.decode("#FFF6EC"));
@@ -432,8 +453,7 @@ public class OrderPanel extends JPanel {
         });
     }
 
-    // ======================== FIXED: ADD ITEM TO CART ========================
-
+    // ======================== ADD ITEM TO CART ========================
     private void addItemToCart() {
         try {
             MenuItemResponse selectedItem = (MenuItemResponse) cbMenuItem.getSelectedItem();
@@ -448,7 +468,6 @@ public class OrderPanel extends JPanel {
                 return;
             }
 
-            // FIX: Properly get the restaurant ID from the selected item
             int restaurantId = selectedItem.getRestaurant();
             if (restaurantId <= 0) {
                 JOptionPane.showMessageDialog(this,
@@ -457,7 +476,7 @@ public class OrderPanel extends JPanel {
                 return;
             }
 
-            // FIX: Check if items are from same restaurant
+            // Check if items are from same restaurant
             if (!orderItems.isEmpty()) {
                 int existingRestaurantId = getCurrentRestaurantId();
                 if (existingRestaurantId != restaurantId) {
@@ -479,18 +498,20 @@ public class OrderPanel extends JPanel {
                 }
             }
 
-            // FIX: Get price as double
+            // ---------- SAFE PRICE PARSING ----------
             double price;
             try {
-                price = Double.parseDouble(selectedItem.getPrice());
-            } catch (NumberFormatException e) {
+                price = parsePriceSafely(selectedItem.getPrice());
+            } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this,
-                        "Invalid price format for item: " + selectedItem.getPrice(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                        "Invalid price format for item: " + selectedItem.getName() +
+                                "\nPrice value: " + selectedItem.getPrice() +
+                                "\n\nPlease contact administrator to fix this item's price.",
+                        "Price Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // FIX: Check if already in cart - using proper comparison
+            // Check if already in cart
             Integer itemId = selectedItem.getId();
             boolean found = false;
             for (int i = 0; i < cartModel.getRowCount(); i++) {
@@ -502,7 +523,6 @@ public class OrderPanel extends JPanel {
                     updateSubtotal(i);
                     updateTotalAndRestaurant();
 
-                    // Update orderItems list
                     for (OrderItemRequest item : orderItems) {
                         if (item.getMenuItemId() == itemId) {
                             item.setQuantity(newQty);
@@ -518,7 +538,6 @@ public class OrderPanel extends JPanel {
             }
 
             if (!found) {
-                // FIX: Calculate subtotal correctly
                 double subtotal = price * quantity;
                 cartModel.addRow(new Object[]{
                         selectedItem.getId(),
@@ -528,15 +547,12 @@ public class OrderPanel extends JPanel {
                         String.format("$%.2f", subtotal)
                 });
 
-                // FIX: Create OrderItemRequest with all required fields
                 OrderItemRequest orderItem = new OrderItemRequest();
                 orderItem.setMenuItemId(selectedItem.getId());
                 orderItem.setQuantity(quantity);
                 orderItem.setPrice(price);
-                // Note: OrderItemRequest might also need restaurantId or other fields
                 orderItems.add(orderItem);
 
-                // FIX: Update selected restaurant ID
                 selectedRestaurantId = restaurantId;
 
                 updateTotalAndRestaurant();
@@ -571,8 +587,7 @@ public class OrderPanel extends JPanel {
         lblTotal.setText("Total: $0.00");
     }
 
-    // ======================== FIXED: REMOVE SELECTED ITEM ========================
-
+    // ======================== REMOVE SELECTED ITEM ========================
     private void removeSelectedItem() {
         int selectedRow = cartTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -588,7 +603,6 @@ public class OrderPanel extends JPanel {
             cartModel.removeRow(selectedRow);
             orderItems.removeIf(item -> item.getMenuItemId() == itemId);
 
-            // If cart is empty, reset restaurant
             if (orderItems.isEmpty()) {
                 selectedRestaurantId = -1;
                 lblRestaurant.setText("Selected Restaurant: None");
@@ -597,8 +611,7 @@ public class OrderPanel extends JPanel {
         }
     }
 
-    // ======================== FIXED: CLEAR CART ========================
-
+    // ======================== CLEAR CART ========================
     private void clearCart() {
         if (cartModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Cart is already empty!", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -632,14 +645,12 @@ public class OrderPanel extends JPanel {
         double total = calculateTotal();
         lblTotal.setText(String.format("Total: $%.2f", total));
 
-        // FIX: Use stored restaurant ID to avoid repeated lookups
         if (!orderItems.isEmpty() && selectedRestaurantId > 0) {
             RestaurantResponse restaurant = findRestaurantById(selectedRestaurantId);
             if (restaurant != null) {
                 lblRestaurant.setText("Selected Restaurant: " + restaurant.getName());
             }
         } else if (!orderItems.isEmpty()) {
-            // Fallback: get from first item
             int firstItemId = orderItems.get(0).getMenuItemId();
             MenuItemResponse firstItem = menuItemCache.get(firstItemId);
             if (firstItem != null) {
@@ -669,8 +680,7 @@ public class OrderPanel extends JPanel {
         return total;
     }
 
-    // ======================== FIXED: CREATE ORDER ========================
-
+    // ======================== CREATE ORDER (FIXED) ========================
     private void createOrder() {
         if (orderItems.isEmpty()) {
             JOptionPane.showMessageDialog(this,
@@ -679,7 +689,6 @@ public class OrderPanel extends JPanel {
             return;
         }
 
-        // FIX: Validate that the current user has a valid ID
         if (currentUser == null || currentUser.getId() <= 0) {
             JOptionPane.showMessageDialog(this,
                     "You must be logged in to place an order.\nPlease log out and log in again.",
@@ -688,7 +697,6 @@ public class OrderPanel extends JPanel {
         }
 
         try {
-            // FIX: Use stored restaurant ID
             if (selectedRestaurantId <= 0) {
                 JOptionPane.showMessageDialog(this,
                         "No restaurant selected. Please add items from a valid restaurant.",
@@ -704,7 +712,6 @@ public class OrderPanel extends JPanel {
                 return;
             }
 
-            // FIX: Ensure each OrderItemRequest has valid data
             for (OrderItemRequest item : orderItems) {
                 if (item.getMenuItemId() <= 0 || item.getQuantity() <= 0 || item.getPrice() <= 0) {
                     JOptionPane.showMessageDialog(this,
@@ -716,7 +723,6 @@ public class OrderPanel extends JPanel {
 
             double total = calculateTotal();
 
-            // Show confirmation dialog
             StringBuilder orderSummary = new StringBuilder();
             orderSummary.append("<html><div style='font-size:12pt;'>");
             orderSummary.append("<b>Order Summary</b><br><br>");
@@ -739,38 +745,25 @@ public class OrderPanel extends JPanel {
 
             if (confirm != JOptionPane.YES_OPTION) return;
 
-            // Payment type
+            // ---------- FIX: Use payment type as-is (no transformation) ----------
             String paymentType = (String) cbPaymentType.getSelectedItem();
             if (paymentType == null || paymentType.trim().isEmpty()) {
-                paymentType = "Credit Card";
+                paymentType = "Credit Card";  // fallback – must be a valid enum value
             }
 
-            // FIX: Create payment with proper values
             Payment payment = new Payment();
             payment.setAmount(total);
-            payment.setType(paymentType.toUpperCase().replace(" ", "_"));
-            // If Payment has other required fields, set them here
+            payment.setType(paymentType);  // keep exactly as selected
+            // --------------------------------------------------------------------
 
-            // FIX: Create OrderItem objects for the request
-            List<OrderItem> orderItemEntities = new ArrayList<>();
-            for (OrderItemRequest itemReq : orderItems) {
-                OrderItem orderItem = new OrderItem();
-                orderItem.setMenuItemId(itemReq.getMenuItemId());
-                orderItem.setQuantity(itemReq.getQuantity());
-                orderItem.setPrice(itemReq.getPrice());
-                orderItemEntities.add(orderItem);
-            }
-
-            // FIX: Create order request with all required fields
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setOrderDate(LocalDateTime.now());
             orderRequest.setTotalPrice(total);
             orderRequest.setUser(currentUser);
             orderRequest.setRestaurant(restaurant);
-            orderRequest.setOrderItems(orderItems); // Using the existing List<OrderItemRequest>
+            orderRequest.setOrderItems(orderItems);
             orderRequest.setPayment(payment);
 
-            // Process order
             orderService.createOrder(orderRequest);
 
             JOptionPane.showMessageDialog(this,
@@ -781,7 +774,6 @@ public class OrderPanel extends JPanel {
                             "</div></html>",
                     "Order Success", JOptionPane.INFORMATION_MESSAGE);
 
-            // Clear cart and refresh
             clearCartSilently();
             loadOrderHistory();
 
@@ -797,8 +789,7 @@ public class OrderPanel extends JPanel {
         }
     }
 
-    // ======================== OTHER METHODS (unchanged) ========================
-
+    // ======================== OTHER METHODS ========================
     private void loadMenuItems() {
         try {
             List<MenuItemResponse> menuItems = menuService.getAllMenuItems();
@@ -826,7 +817,6 @@ public class OrderPanel extends JPanel {
                 return;
             }
             List<OrderResponse> orders = orderService.findOrdersByUserId(currentUser.getId());
-            int userOrderCount = 0;
             for (OrderResponse order : orders) {
                 if (order != null && order.getUser() != null && order.getRestaurant() != null) {
                     String status = "Completed";
@@ -841,7 +831,6 @@ public class OrderPanel extends JPanel {
                             order.getOrderDate() != null ? order.getOrderDate().toString() : "N/A",
                             status
                     });
-                    userOrderCount++;
                 }
             }
         } catch (Exception ex) {
