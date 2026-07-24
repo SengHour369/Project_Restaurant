@@ -8,6 +8,7 @@ public class MenuItem extends BaseEntity {
     private String name;
     private String description;
     private Boolean active;
+    private Boolean isVeg;
 
     public MenuItem(Restaurant restaurant, Double code,
                     String name, String description, Boolean active) {
@@ -56,5 +57,13 @@ public class MenuItem extends BaseEntity {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Boolean getIsVeg() {
+        return isVeg;
+    }
+
+    public void setIsVeg(Boolean isVeg) {
+        this.isVeg = isVeg;
     }
 }

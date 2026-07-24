@@ -20,6 +20,7 @@ import static org.example.Database.DatabaseConnection.getConnection;
 public class ServiceOrderImp implements ServiceOrder {
     ServiceUserImp serviceUser = new ServiceUserImp();
     ServiceRestaurantImp serviceRestaurant = new ServiceRestaurantImp();
+    ServicePaymentImp servicePayment = new ServicePaymentImp();
 
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) throws MessageException {
@@ -93,6 +94,10 @@ public class ServiceOrderImp implements ServiceOrder {
 
             conn.commit();
 
+            Payment payment = new Payment(paymentId);
+            payment.setAmount(orderRequest.getTotalPrice());
+            payment.setType(paymentType);
+
             return new OrderResponse(
                     orderId,
                     orderRequest.getOrderDate(),
@@ -100,7 +105,7 @@ public class ServiceOrderImp implements ServiceOrder {
                     orderRequest.getUser(),
                     orderRequest.getRestaurant(),
                     orderItems,
-                    new Payment(paymentId)
+                    payment
             );
 
         } catch (SQLException e) {
@@ -161,6 +166,13 @@ public class ServiceOrderImp implements ServiceOrder {
             UserResponse user = serviceUser.findById(userId);
             RestaurantResponse restaurant = serviceRestaurant.findRestaurantById(restaurantId);
 
+            Payment payment = new Payment(paymentId);
+            org.example.DTO.Response.PaymentResponse paymentInfo = servicePayment.findPaymentById(paymentId);
+            if (paymentInfo != null) {
+                payment.setType(paymentInfo.getType());
+                payment.setAmount(paymentInfo.getAmount());
+            }
+
             return new OrderResponse(
                     orderId,
                     orderDate,
@@ -168,7 +180,7 @@ public class ServiceOrderImp implements ServiceOrder {
                     user,
                     restaurant,
                     items,
-                    new Payment(paymentId)
+                    payment
             );
 
         } catch (SQLException e) {

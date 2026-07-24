@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceRestaurantImp implements ServiceRestaurant {
-     RestaurantServiceHandler restaurantServiceHandler =  new RestaurantServiceHandler();
+    RestaurantServiceHandler restaurantServiceHandler =  new RestaurantServiceHandler();
     @Override
     public void CreateRestaurant(RestaurantRequest r) throws MessageException {
         restaurantServiceHandler.hasValidCategory(r.getCategory());
@@ -23,8 +23,8 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
 
         String sql = """
         INSERT INTO restaurants
-        ( name, category, rating, phone_number, location)
-        VALUES ( ?, ?, ?, ?, ?)
+        ( name, category, rating, phone_number, location, image_path)
+        VALUES ( ?, ?, ?, ?, ?, ?)
     """;
 
         try (Connection con = DatabaseConnection.getConnection();
@@ -34,6 +34,7 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
             ps.setInt(3, r.getRating());
             ps.setString(4, r.getPhone_number());
             ps.setString(5, r.getLocation());
+            ps.setString(6, r.getImage_path());
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -57,7 +58,7 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
         } catch (Exception e) {
             e.printStackTrace();
         }
-      System.out.println("s dnfbj" + list);
+        System.out.println("s dnfbj" + list);
         return list;
     }
 
@@ -85,7 +86,7 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
     public RestaurantResponse updateRestaurant(RestaurantRequest r, int id) {
         String sql = """
             UPDATE restaurants SET
-            code=?, name=?, category=?, rating=?, phone_number=?, location=?
+            name=?, category=?, rating=?, phone_number=?, location=?, image_path=?
             WHERE id=?
         """;
 
@@ -97,8 +98,8 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
             ps.setInt(3, r.getRating());
             ps.setString(4, r.getPhone_number());
             ps.setString(5, r.getLocation());
-
-            ps.setInt(9, id);
+            ps.setString(6, r.getImage_path());
+            ps.setInt(7, id);
 
             ps.executeUpdate();
             return findRestaurantById(id);
@@ -132,7 +133,8 @@ public class ServiceRestaurantImp implements ServiceRestaurant {
                 rs.getString("category"),
                 rs.getInt("rating"),
                 rs.getString("phone_number"),
-                rs.getString("location")
+                rs.getString("location"),
+                rs.getString("image_path")
         );
     }
 }

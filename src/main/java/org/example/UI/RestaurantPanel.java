@@ -29,19 +29,26 @@ public class RestaurantPanel extends JPanel {
     private final JLabel lblRatingValue = new JLabel("0/5");
     private final JTextField txtPhone = createTextField(true);
     private final JTextField txtLocation = createTextField(true);
+    private final JLabel lblImagePreview = new JLabel("No Image", SwingConstants.CENTER);
+
+    // Path of the image staged/stored for the restaurant currently in the form
+    private String selectedImagePath;
+    // Restaurant ID -> stored image path, refreshed on every load
+    private final java.util.Map<Integer, String> imagePathById = new java.util.HashMap<>();
 
     // Buttons
     private JButton btnAdd;
     private JButton btnUpdate;
     private JButton btnDelete;
     private JButton btnClear;
+    private JButton btnChooseImage;
 
     // Search field
     private final JTextField txtSearch = new JTextField();
 
     // Table
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"ID", "Name", "Category", "Rating", "Phone", "Location", "Internal ID"}, 0
+            new String[]{"", "ID", "Name", "Category", "Rating", "Phone", "Location", "Internal ID"}, 0
     ) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -50,7 +57,8 @@ public class RestaurantPanel extends JPanel {
 
         @Override
         public Class<?> getColumnClass(int column) {
-            if (column == 0 || column == 6) return Integer.class;
+            if (column == 0) return Icon.class;
+            if (column == 1 || column == 7) return Integer.class;
             return String.class;
         }
     };
@@ -72,7 +80,7 @@ public class RestaurantPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.decode("#FFF6EC"));
+        setBackground(Color.decode("#F5F6F8"));
 
         // Make it full screen
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -88,9 +96,12 @@ public class RestaurantPanel extends JPanel {
         splitPane.setContinuousLayout(true);
         splitPane.setBorder(null);
 
-        // Left panel - Form
-        JPanel formPanel = createFormPanel();
-        splitPane.setLeftComponent(formPanel);
+        // Left panel - Form (scrollable so it never gets clipped on smaller windows)
+        JScrollPane formScroll = new JScrollPane(createFormPanel());
+        formScroll.setBorder(null);
+        formScroll.getViewport().setBackground(Color.decode("#F5F6F8"));
+        formScroll.getVerticalScrollBar().setUnitIncrement(16);
+        splitPane.setLeftComponent(formScroll);
 
         // Right panel - Table
         JPanel tablePanel = createTablePanel();
@@ -129,31 +140,31 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#FF9F45")),
+                BorderFactory.createMatteBorder(0, 0, 2, 0, Color.decode("#4F46E5")),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
         // Title
         JLabel titleLabel = new JLabel("🏪 Restaurant Management");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
-        titleLabel.setForeground(Color.decode("#6B4226"));
+        titleLabel.setForeground(Color.decode("#111827"));
 
         // Search panel
         JPanel searchPanel = new JPanel(new BorderLayout(15, 0));
-        searchPanel.setBackground(Color.decode("#FFF6EC"));
+        searchPanel.setBackground(Color.decode("#F5F6F8"));
 
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        searchLabel.setForeground(Color.decode("#6B4226"));
+        searchLabel.setForeground(Color.decode("#111827"));
 
         txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 16));
         txtSearch.setBorder(new UITheme.RoundedLineBorder(UITheme.PRIMARY, 16, 12, 20));
         txtSearch.setPreferredSize(new Dimension(400, 45));
         txtSearch.setToolTipText("Search by name, category, location...");
 
-        JButton btnClearSearch = createIconButton("Clear", Color.decode("#FF6B5B"), 16);
+        JButton btnClearSearch = createIconButton("Clear", Color.decode("#EF4444"), 16);
         btnClearSearch.setToolTipText("Clear search");
         btnClearSearch.addActionListener(e -> {
             txtSearch.setText("");
@@ -171,113 +182,126 @@ public class RestaurantPanel extends JPanel {
     }
 
     private JPanel createFormPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBackground(Color.decode("#FFF6EC"));
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        JPanel outer = new JPanel(new BorderLayout());
+        outer.setBackground(Color.decode("#F5F6F8"));
+        outer.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
 
-        // Form title
-        JLabel formTitle = new JLabel("✏️ Add/Edit Restaurant");
-        formTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        formTitle.setForeground(Color.decode("#6B4226"));
-        formTitle.setBounds(20, 20, 400, 40);
-        panel.add(formTitle);
+        JPanel card = UITheme.createCard();
+        card.setLayout(new BorderLayout());
 
-        int yPos = 80;
-        int fieldWidth = 500;
-        int labelWidth = 180;
+        JLabel titleLabel = new JLabel("✏️  Add / Edit Restaurant");
+        titleLabel.setFont(UITheme.FONT_TITLE);
+        titleLabel.setForeground(UITheme.TEXT_DARK);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(22, 24, 8, 24));
+        card.add(titleLabel, BorderLayout.NORTH);
 
-        // Restaurant ID (read-only)
-        addFormField("Restaurant ID:", txtId, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        // ---- Image row: preview + choose button, side by side ----
+        JPanel imageRow = new JPanel(new BorderLayout(16, 0));
+        imageRow.setOpaque(false);
+        imageRow.setBorder(BorderFactory.createEmptyBorder(4, 24, 20, 24));
 
-        // Name field
-        addFormField("Restaurant Name:", txtName, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        lblImagePreview.setPreferredSize(new Dimension(110, 90));
+        lblImagePreview.setOpaque(true);
+        lblImagePreview.setBackground(Color.WHITE);
+        lblImagePreview.setBorder(new UITheme.RoundedLineBorder(UITheme.BORDER, 12, 0, 0));
+        lblImagePreview.setFont(UITheme.FONT_MUTED);
+        lblImagePreview.setForeground(UITheme.TEXT_MUTED);
+        imageRow.add(lblImagePreview, BorderLayout.WEST);
 
-        // Category combo
-        JLabel lblCategory = new JLabel("Category:");
-        lblCategory.setBounds(20, yPos, labelWidth, 35);
-        lblCategory.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblCategory.setForeground(Color.decode("#6B4226"));
-        panel.add(lblCategory);
+        JPanel imageSide = new JPanel();
+        imageSide.setOpaque(false);
+        imageSide.setLayout(new BoxLayout(imageSide, BoxLayout.Y_AXIS));
+        JLabel imgHint = new JLabel("<html>A photo helps customers recognize<br>this restaurant while ordering.</html>");
+        imgHint.setFont(UITheme.FONT_MUTED);
+        imgHint.setForeground(UITheme.TEXT_MUTED);
+        imgHint.setAlignmentX(LEFT_ALIGNMENT);
+        btnChooseImage = createStyledButton("📷 Choose Image", UITheme.PRIMARY);
+        btnChooseImage.setAlignmentX(LEFT_ALIGNMENT);
+        imageSide.add(imgHint);
+        imageSide.add(Box.createVerticalStrut(10));
+        imageSide.add(btnChooseImage);
+        imageRow.add(imageSide, BorderLayout.CENTER);
 
-        txtCategory.setBounds(20 + labelWidth + 10, yPos, fieldWidth - labelWidth - 30, 35);
-        txtCategory.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        txtCategory.setBackground(Color.decode("#FFF6EC"));
-        panel.add(txtCategory);
-        yPos += 55;
+        card.add(imageRow, BorderLayout.CENTER);
 
-        // Rating slider
-        JLabel lblRating = new JLabel("Rating:");
-        lblRating.setBounds(20, yPos, labelWidth, 35);
-        lblRating.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblRating.setForeground(Color.decode("#6B4226"));
-        panel.add(lblRating);
+        // ---- Fields ----
+        JPanel fields = new JPanel(new GridBagLayout());
+        fields.setOpaque(false);
+        fields.setBorder(BorderFactory.createEmptyBorder(0, 24, 8, 24));
 
-        txtRating.setBounds(20 + labelWidth + 10, yPos, 200, 35);
-        txtRating.setMajorTickSpacing(1);
-        txtRating.setPaintTicks(true);
-        txtRating.setPaintLabels(true);
-        txtRating.setSnapToTicks(true);
-        txtRating.setBackground(Color.decode("#FFF6EC"));
-        panel.add(txtRating);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 0, 8, 0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
 
-        lblRatingValue.setBounds(20 + labelWidth + 10 + 210, yPos, 80, 35);
-        lblRatingValue.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblRatingValue.setForeground(Color.decode("#FFB627"));
-        panel.add(lblRatingValue);
-        yPos += 55;
+        int row = 0;
+        gbc.gridx = 0; gbc.gridy = row++;
+        gbc.gridwidth = 2;
+        fields.add(fieldGroup("Restaurant ID (auto-assigned)", txtId), gbc);
 
-        // Phone field
-        addFormField("Phone Number:", txtPhone, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 55;
+        gbc.gridx = 0; gbc.gridy = row++;
+        fields.add(fieldGroup("Restaurant Name", txtName), gbc);
 
-        // Location field
-        addFormField("Location:", txtLocation, 20, yPos, labelWidth, fieldWidth, panel);
-        yPos += 65;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0; gbc.gridy = row;
+        fields.add(fieldGroup("Category", txtCategory), gbc);
+        gbc.gridx = 1; gbc.gridy = row++;
+        fields.add(ratingGroup(), gbc);
 
-        // Buttons panel
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 15, 15));
-        buttonPanel.setBounds(20, yPos, fieldWidth + 10, 110);
-        buttonPanel.setBackground(Color.decode("#FFF6EC"));
+        gbc.gridx = 0; gbc.gridy = row;
+        fields.add(fieldGroup("Phone Number", txtPhone), gbc);
+        gbc.gridx = 1; gbc.gridy = row++;
+        fields.add(fieldGroup("Location", txtLocation), gbc);
 
-        btnAdd = createStyledButton("Add Restaurant", Color.decode("#6FCF97"));
-        btnUpdate = createStyledButton("Update", Color.decode("#FF9F45"));
-        btnDelete = createStyledButton("Delete", Color.decode("#FF6B5B"));
-        btnClear = createStyledButton("Clear", Color.decode("#D8A48F"));
+        card.add(fields, BorderLayout.SOUTH);
 
-        // Make buttons larger
-        Dimension buttonSize = new Dimension(180, 45);
-        btnAdd.setPreferredSize(buttonSize);
-        btnUpdate.setPreferredSize(buttonSize);
-        btnDelete.setPreferredSize(buttonSize);
-        btnClear.setPreferredSize(buttonSize);
+        // ---- Actions ----
+        JPanel actions = new JPanel();
+        actions.setOpaque(false);
+        actions.setLayout(new BoxLayout(actions, BoxLayout.Y_AXIS));
+        actions.setBorder(BorderFactory.createEmptyBorder(4, 24, 24, 24));
 
-        buttonPanel.add(btnAdd);
-        buttonPanel.add(btnUpdate);
-        buttonPanel.add(btnDelete);
-        buttonPanel.add(btnClear);
-        panel.add(buttonPanel);
+        JPanel row1 = new JPanel(new GridLayout(1, 2, 10, 0));
+        row1.setOpaque(false);
+        btnAdd = createStyledButton("Add Restaurant", UITheme.SUCCESS);
+        btnUpdate = createStyledButton("Update", UITheme.PRIMARY);
+        row1.add(btnAdd);
+        row1.add(btnUpdate);
 
-        yPos += 120;
+        JPanel row2 = new JPanel(new GridLayout(1, 2, 10, 0));
+        row2.setOpaque(false);
+        btnDelete = createStyledButton("Delete", UITheme.SECONDARY);
+        btnClear = createStyledButton("Clear", UITheme.NEUTRAL);
+        row2.add(btnDelete);
+        row2.add(btnClear);
 
-        // Quick actions
-        JLabel quickActions = new JLabel("Quick Actions:");
-        quickActions.setBounds(20, yPos, 150, 30);
-        quickActions.setFont(new Font("SansSerif", Font.BOLD, 16));
-        quickActions.setForeground(Color.decode("#6B4226"));
-        panel.add(quickActions);
+        row1.setAlignmentX(LEFT_ALIGNMENT);
+        row1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        row2.setAlignmentX(LEFT_ALIGNMENT);
+        row2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
-        JPanel quickButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        quickButtons.setBounds(180, yPos, fieldWidth - 160, 35);
-        quickButtons.setBackground(Color.decode("#FFF6EC"));
+        actions.add(row1);
+        actions.add(Box.createVerticalStrut(10));
+        actions.add(row2);
+        actions.add(Box.createVerticalStrut(18));
 
-        JButton btnRefresh = createIconButton("Refresh", Color.decode("#E07A5F"), 14);
+        JLabel quickActionsLabel = new JLabel("QUICK ACTIONS");
+        quickActionsLabel.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 12));
+        quickActionsLabel.setForeground(UITheme.PRIMARY);
+        quickActionsLabel.setAlignmentX(LEFT_ALIGNMENT);
+        quickActionsLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 8, 0));
+        actions.add(quickActionsLabel);
+
+        JPanel quickButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        quickButtons.setOpaque(false);
+        quickButtons.setAlignmentX(LEFT_ALIGNMENT);
+        quickButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+
+        JButton btnRefresh = createIconButton("Refresh", UITheme.PRIMARY, 14);
         btnRefresh.setToolTipText("Refresh List");
-        JButton btnViewDetails = createIconButton("Details", Color.decode("#4CB963"), 14);
+        JButton btnViewDetails = createIconButton("Details", UITheme.SUCCESS, 14);
         btnViewDetails.setToolTipText("View Details");
-        JButton btnCopyPhone = createIconButton("Copy Phone", Color.decode("#FFB627"), 14);
+        JButton btnCopyPhone = createIconButton("Copy Phone", UITheme.ACCENT, 14);
         btnCopyPhone.setToolTipText("Copy Phone");
 
         btnRefresh.addActionListener(e -> refreshRestaurants());
@@ -287,41 +311,101 @@ public class RestaurantPanel extends JPanel {
         quickButtons.add(btnRefresh);
         quickButtons.add(btnViewDetails);
         quickButtons.add(btnCopyPhone);
-        panel.add(quickButtons);
+        actions.add(quickButtons);
+        actions.add(Box.createVerticalStrut(16));
 
-        yPos += 50;
+        JLabel tipsLabel = new JLabel("<html><div style='text-align:left;'>"
+                + "Tips: Double-click a row to edit &middot; Ctrl+F to search &middot; "
+                + "Ctrl+N for a new restaurant &middot; Enter to move between fields</div></html>");
+        tipsLabel.setFont(UITheme.FONT_MUTED);
+        tipsLabel.setForeground(UITheme.TEXT_MUTED);
+        tipsLabel.setAlignmentX(LEFT_ALIGNMENT);
+        actions.add(tipsLabel);
 
-        // Tips
-        JLabel tipsLabel = new JLabel("<html><div style='text-align: center;'>Tips:<br>" +
-                "• Double-click row to edit<br>" +
-                "• Click category to filter<br>" +
-                "• Use Ctrl+F to search<br>" +
-                "• Press Enter to navigate fields</div></html>");
-        tipsLabel.setBounds(20, yPos, fieldWidth + 10, 80);
-        tipsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        tipsLabel.setForeground(Color.decode("#A67B5B"));
-        tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        panel.add(tipsLabel);
+        JPanel cardWithActions = new JPanel(new BorderLayout());
+        cardWithActions.setOpaque(false);
+        cardWithActions.add(card, BorderLayout.CENTER);
+        cardWithActions.add(actions, BorderLayout.SOUTH);
 
-        return panel;
+        outer.add(cardWithActions, BorderLayout.NORTH);
+        return outer;
+    }
+
+    private JPanel fieldGroup(String label, JComponent field) {
+        JPanel group = new JPanel();
+        group.setOpaque(false);
+        group.setLayout(new BoxLayout(group, BoxLayout.Y_AXIS));
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_DARK);
+        lbl.setBorder(BorderFactory.createEmptyBorder(0, 2, 6, 0));
+        lbl.setAlignmentX(LEFT_ALIGNMENT);
+
+        field.setFont(UITheme.FONT_BODY);
+        field.setAlignmentX(LEFT_ALIGNMENT);
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        field.setPreferredSize(new Dimension(10, 40));
+        if (field instanceof JComboBox) {
+            ((JComboBox<?>) field).setBackground(Color.WHITE);
+        } else {
+            field.setBorder(new UITheme.RoundedLineBorder(UITheme.BORDER, 12, 10, 12));
+        }
+
+        group.add(lbl);
+        group.add(field);
+        return group;
+    }
+
+    private JPanel ratingGroup() {
+        JPanel group = new JPanel();
+        group.setOpaque(false);
+        group.setLayout(new BoxLayout(group, BoxLayout.Y_AXIS));
+
+        JLabel lbl = new JLabel("Rating");
+        lbl.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_DARK);
+        lbl.setBorder(BorderFactory.createEmptyBorder(0, 2, 6, 0));
+        lbl.setAlignmentX(LEFT_ALIGNMENT);
+
+        JPanel row = new JPanel(new BorderLayout(10, 0));
+        row.setOpaque(false);
+        row.setAlignmentX(LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+
+        txtRating.setMajorTickSpacing(1);
+        txtRating.setPaintTicks(true);
+        txtRating.setPaintLabels(true);
+        txtRating.setSnapToTicks(true);
+        txtRating.setOpaque(false);
+        row.add(txtRating, BorderLayout.CENTER);
+
+        lblRatingValue.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 15));
+        lblRatingValue.setForeground(UITheme.ACCENT);
+        lblRatingValue.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 2));
+        row.add(lblRatingValue, BorderLayout.EAST);
+
+        group.add(lbl);
+        group.add(row);
+        return group;
     }
 
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 30));
 
         // Table header
         JPanel tableHeader = new JPanel(new BorderLayout());
-        tableHeader.setBackground(Color.decode("#FFF6EC"));
+        tableHeader.setBackground(Color.decode("#F5F6F8"));
         tableHeader.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
         JLabel tableTitle = new JLabel("📋 Restaurants List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        tableTitle.setForeground(Color.decode("#6B4226"));
+        tableTitle.setForeground(Color.decode("#111827"));
 
         lblSelectedInfo.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        lblSelectedInfo.setForeground(Color.decode("#A67B5B"));
+        lblSelectedInfo.setForeground(Color.decode("#6B7280"));
 
         tableHeader.add(tableTitle, BorderLayout.WEST);
         tableHeader.add(lblSelectedInfo, BorderLayout.EAST);
@@ -329,14 +413,31 @@ public class RestaurantPanel extends JPanel {
         // Configure table
         restaurantTable.setRowHeight(45);
         restaurantTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-        restaurantTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
+        restaurantTable.getTableHeader().setBackground(Color.decode("#4F46E5"));
         restaurantTable.getTableHeader().setForeground(Color.WHITE);
         restaurantTable.getTableHeader().setPreferredSize(new Dimension(0, 50));
         restaurantTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
         restaurantTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+        // Thumbnail column: small, fixed width, no header text
+        restaurantTable.getColumnModel().getColumn(0).setPreferredWidth(55);
+        restaurantTable.getColumnModel().getColumn(0).setMaxWidth(55);
+        restaurantTable.getColumnModel().getColumn(0).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                lbl.setIcon(value instanceof Icon ? (Icon) value : null);
+                lbl.setBackground(isSelected ? new Color(224, 231, 255)
+                        : (row % 2 == 0 ? Color.decode("#F5F6F8") : new Color(249, 250, 251)));
+                lbl.setOpaque(true);
+                return lbl;
+            }
+        });
+
         // Hide internal ID column
-        restaurantTable.removeColumn(restaurantTable.getColumnModel().getColumn(6));
+        restaurantTable.removeColumn(restaurantTable.getColumnModel().getColumn(7));
 
         // Set up table sorter
         tableSorter = new TableRowSorter<>(tableModel);
@@ -351,23 +452,23 @@ public class RestaurantPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.decode("#FFF6EC"));
+                        c.setBackground(Color.decode("#F5F6F8"));
                     } else {
-                        c.setBackground(new Color(255, 244, 230));
+                        c.setBackground(new Color(249, 250, 251));
                     }
                 } else {
-                    c.setBackground(new Color(255, 224, 178));
+                    c.setBackground(new Color(224, 231, 255));
                     c.setForeground(Color.BLACK);
                 }
 
                 // Style rating column
-                if (column == 3 && value != null) {
-                    setForeground(Color.decode("#FFB627")); // Orange for rating
+                if (column == 4 && value != null) {
+                    setForeground(Color.decode("#F59E0B")); // Orange for rating
                     setFont(getFont().deriveFont(Font.BOLD));
                 }
 
                 // Center align ID column
-                if (column == 0) {
+                if (column == 1) {
                     setHorizontalAlignment(SwingConstants.CENTER);
                 }
 
@@ -380,7 +481,7 @@ public class RestaurantPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(restaurantTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-        scrollPane.getViewport().setBackground(Color.decode("#FFF6EC"));
+        scrollPane.getViewport().setBackground(Color.decode("#F5F6F8"));
 
         panel.add(tableHeader, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -390,17 +491,17 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel createStatsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
-        panel.setBackground(Color.decode("#FFF1E0"));
+        panel.setBackground(Color.decode("#FFFFFF"));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#FF9F45")),
+                BorderFactory.createMatteBorder(2, 0, 0, 0, Color.decode("#4F46E5")),
                 BorderFactory.createEmptyBorder(15, 30, 15, 30)
         ));
 
         lblTotalRestaurants.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalRestaurants.setForeground(Color.decode("#6B4226"));
+        lblTotalRestaurants.setForeground(Color.decode("#111827"));
 
         lblAvgRating.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblAvgRating.setForeground(Color.decode("#FFB627"));
+        lblAvgRating.setForeground(Color.decode("#F59E0B"));
 
         panel.add(lblTotalRestaurants);
         panel.add(lblAvgRating);
@@ -428,6 +529,7 @@ public class RestaurantPanel extends JPanel {
         btnUpdate.addActionListener(e -> updateRestaurant());
         btnDelete.addActionListener(e -> deleteRestaurant());
         btnClear.addActionListener(e -> clearForm());
+        btnChooseImage.addActionListener(e -> chooseImage());
 
         // Table selection listener
         restaurantTable.getSelectionModel().addListSelectionListener(e -> {
@@ -454,9 +556,9 @@ public class RestaurantPanel extends JPanel {
                             txtCategory.setSelectedItem(category);
 
                             // Show animation
-                            txtCategory.setBackground(new Color(255, 224, 178));
+                            txtCategory.setBackground(new Color(224, 231, 255));
                             Timer timer = new Timer(1000, evt -> {
-                                txtCategory.setBackground(Color.decode("#FFF6EC"));
+                                txtCategory.setBackground(Color.decode("#F5F6F8"));
                             });
                             timer.setRepeats(false);
                             timer.start();
@@ -531,9 +633,9 @@ public class RestaurantPanel extends JPanel {
         } else {
             List<javax.swing.RowFilter<Object, Object>> filters = new ArrayList<>();
 
-            // Search in all visible columns except ID
+            // Search in all visible text columns (skip the thumbnail icon and ID columns)
             for (int i = 0; i < tableModel.getColumnCount() - 1; i++) {
-                if (i != 0) { // Skip ID column from search
+                if (i != 0 && i != 1) {
                     filters.add(javax.swing.RowFilter.regexFilter("(?i)" + searchText, i));
                 }
             }
@@ -563,15 +665,29 @@ public class RestaurantPanel extends JPanel {
                         "Phone: %s<br>" +
                         "Location: %s" +
                         "</div></html>",
-                tableModel.getValueAt(modelRow, 0),
                 tableModel.getValueAt(modelRow, 1),
                 tableModel.getValueAt(modelRow, 2),
                 tableModel.getValueAt(modelRow, 3),
                 tableModel.getValueAt(modelRow, 4),
-                tableModel.getValueAt(modelRow, 5)
+                tableModel.getValueAt(modelRow, 5),
+                tableModel.getValueAt(modelRow, 6)
         );
 
-        JOptionPane.showMessageDialog(this, details,
+        JPanel detailPanel = new JPanel(new BorderLayout(0, 10));
+        detailPanel.setOpaque(false);
+        detailPanel.add(new JLabel(details), BorderLayout.CENTER);
+
+        String imgPath = imagePathById.get((Integer) tableModel.getValueAt(modelRow, 1));
+        if (imgPath != null && !imgPath.isBlank()) {
+            java.io.File imgFile = new java.io.File(imgPath);
+            if (imgFile.exists()) {
+                Image scaled = new ImageIcon(imgFile.getAbsolutePath())
+                        .getImage().getScaledInstance(220, 150, Image.SCALE_SMOOTH);
+                detailPanel.add(new JLabel(new ImageIcon(scaled)), BorderLayout.NORTH);
+            }
+        }
+
+        JOptionPane.showMessageDialog(this, detailPanel,
                 "Restaurant Details", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -590,6 +706,82 @@ public class RestaurantPanel extends JPanel {
         JOptionPane.showMessageDialog(this,
                 "Copied to clipboard: " + text,
                 "Copied", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void chooseImage() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Restaurant Image");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Image files", "jpg", "jpeg", "png", "gif"));
+
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        java.io.File selected = chooser.getSelectedFile();
+        try {
+            java.io.File imagesDir = new java.io.File("images/restaurants");
+            imagesDir.mkdirs();
+
+            String ext = "";
+            int dot = selected.getName().lastIndexOf('.');
+            if (dot >= 0) ext = selected.getName().substring(dot);
+
+            java.io.File dest = new java.io.File(imagesDir, "restaurant_" + System.currentTimeMillis() + ext);
+            java.nio.file.Files.copy(selected.toPath(), dest.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            selectedImagePath = "images/restaurants/" + dest.getName();
+            showImagePreview(selectedImagePath);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not load image: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showImagePreview(String path) {
+        if (path == null || path.isBlank()) {
+            lblImagePreview.setIcon(null);
+            lblImagePreview.setText("No Image");
+            return;
+        }
+
+        java.io.File file = new java.io.File(path);
+        if (!file.exists()) {
+            lblImagePreview.setIcon(null);
+            lblImagePreview.setText("Missing");
+            return;
+        }
+
+        Image scaled = new ImageIcon(file.getAbsolutePath())
+                .getImage().getScaledInstance(120, 80, Image.SCALE_SMOOTH);
+        lblImagePreview.setText("");
+        lblImagePreview.setIcon(new ImageIcon(scaled));
+    }
+
+    /** Small 32x32 table thumbnail: the restaurant's photo if set, else a lettered placeholder. */
+    private Icon rowThumbnail(String imagePath, String name) {
+        if (imagePath != null && !imagePath.isBlank()) {
+            java.io.File f = new java.io.File(imagePath);
+            if (f.exists()) {
+                return new ImageIcon(new ImageIcon(f.getAbsolutePath())
+                        .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+            }
+        }
+        java.awt.image.BufferedImage img =
+                new java.awt.image.BufferedImage(32, 32, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(UITheme.PRIMARY_SOFT);
+        g.fillRoundRect(0, 0, 32, 32, 8, 8);
+        g.setColor(UITheme.PRIMARY);
+        g.setFont(new Font("SansSerif", Font.BOLD, 14));
+        String ch = (name != null && !name.isBlank()) ? name.trim().substring(0, 1).toUpperCase() : "?";
+        FontMetrics fm = g.getFontMetrics();
+        g.drawString(ch, (32 - fm.stringWidth(ch)) / 2, (32 + fm.getAscent()) / 2 - 3);
+        g.dispose();
+        return new ImageIcon(img);
     }
 
     public void addRestaurant() {
@@ -715,12 +907,14 @@ public class RestaurantPanel extends JPanel {
                 category != null ? category : "",
                 txtRating.getValue(),
                 txtPhone.getText().trim(),
-                txtLocation.getText().trim()
+                txtLocation.getText().trim(),
+                selectedImagePath
         );
     }
 
     private void loadAllRestaurants() {
         tableModel.setRowCount(0);
+        imagePathById.clear();
         try {
             List<RestaurantResponse> restaurants = restaurantService.findAllRestaurants();
 
@@ -728,7 +922,9 @@ public class RestaurantPanel extends JPanel {
             int ratedRestaurants = 0;
 
             for (RestaurantResponse restaurant : restaurants) {
+                imagePathById.put(restaurant.getId(), restaurant.getImage_path());
                 tableModel.addRow(new Object[]{
+                        rowThumbnail(restaurant.getImage_path(), restaurant.getName()),
                         restaurant.getId(),
                         restaurant.getName(),
                         restaurant.getCategory(),
@@ -761,12 +957,12 @@ public class RestaurantPanel extends JPanel {
 
     private Color getRatingColor(int rating) {
         switch (rating) {
-            case 5: return Color.decode("#5FAD56"); // Green
-            case 4: return Color.decode("#6FCF97"); // Light Green
-            case 3: return Color.decode("#FFB627"); // Orange
-            case 2: return Color.decode("#FF8C42"); // Dark Orange
-            case 1: return Color.decode("#FF6B5B"); // Red
-            default: return Color.decode("#D8A48F"); // Gray
+            case 5: return Color.decode("#16A34A"); // Green
+            case 4: return Color.decode("#16A34A"); // Light Green
+            case 3: return Color.decode("#F59E0B"); // Orange
+            case 2: return Color.decode("#F59E0B"); // Dark Orange
+            case 1: return Color.decode("#EF4444"); // Red
+            default: return Color.decode("#64748B"); // Gray
         }
     }
 
@@ -776,11 +972,11 @@ public class RestaurantPanel extends JPanel {
 
         int modelRow = restaurantTable.convertRowIndexToModel(selectedRow);
 
-        txtId.setText(tableModel.getValueAt(modelRow, 0).toString());
-        txtName.setText(tableModel.getValueAt(modelRow, 1).toString());
+        txtId.setText(tableModel.getValueAt(modelRow, 1).toString());
+        txtName.setText(tableModel.getValueAt(modelRow, 2).toString());
 
         // Set category
-        String category = tableModel.getValueAt(modelRow, 2).toString();
+        String category = tableModel.getValueAt(modelRow, 3).toString();
         boolean found = false;
         for (int i = 0; i < txtCategory.getItemCount(); i++) {
             String item = txtCategory.getItemAt(i);
@@ -798,7 +994,7 @@ public class RestaurantPanel extends JPanel {
         }
 
         // Extract rating from display string like "3/5"
-        String ratingDisplay = tableModel.getValueAt(modelRow, 3).toString();
+        String ratingDisplay = tableModel.getValueAt(modelRow, 4).toString();
         if (ratingDisplay.contains("/")) {
             String ratingStr = ratingDisplay.substring(0, ratingDisplay.indexOf("/")).trim();
             try {
@@ -812,10 +1008,14 @@ public class RestaurantPanel extends JPanel {
         }
 
         // Phone (remove formatting if any)
-        String phone = tableModel.getValueAt(modelRow, 4).toString();
+        String phone = tableModel.getValueAt(modelRow, 5).toString();
         txtPhone.setText(phone.equals("N/A") ? "" : phone);
 
-        txtLocation.setText(tableModel.getValueAt(modelRow, 5).toString());
+        txtLocation.setText(tableModel.getValueAt(modelRow, 6).toString());
+
+        // Load the stored image for this restaurant, if any
+        selectedImagePath = imagePathById.get((Integer) tableModel.getValueAt(modelRow, 1));
+        showImagePreview(selectedImagePath);
 
         // Update selected info label
         lblSelectedInfo.setText("Selected: " + txtName.getText());
@@ -828,6 +1028,8 @@ public class RestaurantPanel extends JPanel {
         txtRating.setValue(0);
         txtPhone.setText("");
         txtLocation.setText("");
+        selectedImagePath = null;
+        showImagePreview(null);
         lblSelectedInfo.setText("Select a restaurant");
         restaurantTable.clearSelection();
         tableSorter.setRowFilter(null);
@@ -839,19 +1041,6 @@ public class RestaurantPanel extends JPanel {
         field.setEditable(editable);
         field.setFont(new Font("SansSerif", Font.PLAIN, 16));
         return field;
-    }
-
-    private void addFormField(String label, JTextField field, int x, int y, int labelWidth, int fieldWidth, JPanel panel) {
-        JLabel lbl = new JLabel(label);
-        lbl.setBounds(x, y, labelWidth, 35);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lbl.setForeground(Color.decode("#6B4226"));
-        panel.add(lbl);
-
-        field.setBounds(x + labelWidth + 10, y, fieldWidth - labelWidth - 30, 35);
-        field.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        field.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 8, 15));
-        panel.add(field);
     }
 
     private JButton createStyledButton(String text, Color color) {

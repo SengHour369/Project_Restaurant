@@ -13,7 +13,7 @@ public class ServiceOrderItemImpl implements ServiceOrderItem {
 
     @Override
     public OrderItemResponse createOrderItem(OrderItemRequest r) {
-        String sql = "INSERT INTO order_items (order_id, menu_item_id, quantity, price) " +
+        String sql = "INSERT INTO orderitems (order_id, menu_item_id, quantity, price) " +
                 "VALUES (?, ?, ?, ?) RETURNING id";
 
         try (Connection con = DatabaseConnection.getConnection();
@@ -44,7 +44,7 @@ public class ServiceOrderItemImpl implements ServiceOrderItem {
 
     @Override
     public OrderItemResponse updateOrderItem(OrderItemRequest r, int id) {
-        String sql = "UPDATE order_items SET order_id=?, menu_item_id=?, quantity=?, price=? WHERE id=?";
+        String sql = "UPDATE orderitems SET order_id=?, menu_item_id=?, quantity=?, price=? WHERE id=?";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -69,7 +69,7 @@ public class ServiceOrderItemImpl implements ServiceOrderItem {
 
     @Override
     public void deleteOrderItem(int id) {
-        String sql = "DELETE FROM order_items WHERE id=?";
+        String sql = "DELETE FROM orderitems WHERE id=?";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -84,7 +84,7 @@ public class ServiceOrderItemImpl implements ServiceOrderItem {
 
     @Override
     public OrderItemResponse findOrderItemById(int id) {
-        String sql = "SELECT * FROM order_items WHERE id=?";
+        String sql = "SELECT * FROM orderitems WHERE id=?";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -112,7 +112,7 @@ public class ServiceOrderItemImpl implements ServiceOrderItem {
     @Override
     public List<OrderItemResponse> findAllOrderItems() {
         List<OrderItemResponse> list = new ArrayList<>();
-        String sql = "SELECT * FROM order_items";
+        String sql = "SELECT * FROM orderitems";
 
         try (Connection con = DatabaseConnection.getConnection();
              Statement st = con.createStatement();

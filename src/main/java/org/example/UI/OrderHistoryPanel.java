@@ -44,7 +44,7 @@ public class OrderHistoryPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.decode("#FFF6EC"));
+        setBackground(Color.decode("#F5F6F8"));
 
         // Header Panel
         JPanel headerPanel = createHeaderPanel();
@@ -61,7 +61,7 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
@@ -70,20 +70,20 @@ public class OrderHistoryPanel extends JPanel {
         // Title
         JLabel titleLabel = new JLabel("📋 Your Order History");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        titleLabel.setForeground(Color.decode("#6B4226"));
+        titleLabel.setForeground(Color.decode("#111827"));
 
         // Filter panel
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        filterPanel.setBackground(Color.decode("#FFF6EC"));
+        filterPanel.setBackground(Color.decode("#F5F6F8"));
 
         JLabel filterLabel = new JLabel("Filter:");
         filterLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         filterCombo.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        filterCombo.setBackground(Color.decode("#FFF6EC"));
+        filterCombo.setBackground(Color.decode("#F5F6F8"));
         filterCombo.addActionListener(e -> filterOrders());
 
-        JButton btnRefresh = createStyledButton("Refresh", Color.decode("#FF9F45"), 14);
+        JButton btnRefresh = createStyledButton("Refresh", Color.decode("#4F46E5"), 14);
         btnRefresh.addActionListener(e -> loadOrderHistory());
 
         filterPanel.add(filterLabel);
@@ -99,14 +99,14 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Style the table
         orderTable.setRowHeight(40);
         orderTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
         orderTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        orderTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
+        orderTable.getTableHeader().setBackground(Color.decode("#4F46E5"));
         orderTable.getTableHeader().setForeground(Color.WHITE);
 
         // Add alternating row colors
@@ -118,15 +118,15 @@ public class OrderHistoryPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.decode("#FFF6EC"));
+                        c.setBackground(Color.decode("#F5F6F8"));
                     } else {
-                        c.setBackground(new Color(255, 244, 230)); // Light blue
+                        c.setBackground(new Color(249, 250, 251)); // Light blue
                     }
                 }
 
                 // Style for total column
                 if (column == 4 && value != null) {
-                    setForeground(Color.decode("#5FAD56")); // Green color for money
+                    setForeground(Color.decode("#16A34A")); // Green color for money
                     setFont(getFont().deriveFont(Font.BOLD));
                 }
 
@@ -174,7 +174,7 @@ public class OrderHistoryPanel extends JPanel {
 
     private JPanel createStatsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 15));
-        panel.setBackground(Color.decode("#FFF1E0"));
+        panel.setBackground(Color.decode("#FFFFFF"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
@@ -182,15 +182,15 @@ public class OrderHistoryPanel extends JPanel {
 
         // Style statistics labels
         lblTotalOrders.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalOrders.setForeground(Color.decode("#6B4226"));
+        lblTotalOrders.setForeground(Color.decode("#111827"));
 
         lblTotalSpent.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblTotalSpent.setForeground(Color.decode("#5FAD56"));
+        lblTotalSpent.setForeground(Color.decode("#16A34A"));
 
         // Average order value
         JLabel lblAvgOrder = new JLabel("Average Order: $0.00");
         lblAvgOrder.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        lblAvgOrder.setForeground(Color.decode("#A67B5B"));
+        lblAvgOrder.setForeground(Color.decode("#6B7280"));
 
         panel.add(lblTotalOrders);
         panel.add(lblTotalSpent);
@@ -288,7 +288,7 @@ public class OrderHistoryPanel extends JPanel {
 
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.decode("#FF9F45"));
+        headerPanel.setBackground(Color.decode("#4F46E5"));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
         JLabel headerLabel = new JLabel(orderId + " - " + restaurant);
@@ -300,7 +300,7 @@ public class OrderHistoryPanel extends JPanel {
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        contentPanel.setBackground(Color.decode("#FFF6EC"));
+        contentPanel.setBackground(Color.decode("#F5F6F8"));
 
         addDetailRow("Order Date:", date, contentPanel);
         addDetailRow("Restaurant:", restaurant, contentPanel);
@@ -320,10 +320,10 @@ public class OrderHistoryPanel extends JPanel {
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        buttonPanel.setBackground(Color.decode("#FFF6EC"));
+        buttonPanel.setBackground(Color.decode("#F5F6F8"));
 
-        JButton btnReorder = createStyledButton("Reorder This", Color.decode("#E07A5F"), 14);
-        JButton btnClose = createStyledButton("Close", Color.decode("#D8A48F"), 14);
+        JButton btnReorder = createStyledButton("Reorder This", Color.decode("#4F46E5"), 14);
+        JButton btnClose = createStyledButton("Close", Color.decode("#64748B"), 14);
 
         btnClose.addActionListener(e -> detailDialog.dispose());
 
@@ -340,16 +340,16 @@ public class OrderHistoryPanel extends JPanel {
 
     private void addDetailRow(String label, String value, JPanel panel) {
         JPanel rowPanel = new JPanel(new BorderLayout());
-        rowPanel.setBackground(Color.decode("#FFF6EC"));
+        rowPanel.setBackground(Color.decode("#F5F6F8"));
         rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 14));
-        lbl.setForeground(Color.decode("#6B4226"));
+        lbl.setForeground(Color.decode("#111827"));
 
         JLabel val = new JLabel(value);
         val.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        val.setForeground(Color.decode("#A67B5B"));
+        val.setForeground(Color.decode("#6B7280"));
 
         rowPanel.add(lbl, BorderLayout.WEST);
         rowPanel.add(val, BorderLayout.EAST);

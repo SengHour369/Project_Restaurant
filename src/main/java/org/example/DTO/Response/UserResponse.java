@@ -9,11 +9,13 @@ public class UserResponse {
     private String address;
     private String email;
     private String status;
+    private String image_path;
 
     public UserResponse(UserResponse user) {
         this.id = user.id;
         this.name = user.name;
         this.gender = user.gender;
+        this.image_path = user.image_path;
     }
 
     public UserResponse() {
@@ -43,4 +45,7 @@ public class UserResponse {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getImage_path() { return image_path; }
+    public void setImage_path(String image_path) { this.image_path = image_path; }
 }

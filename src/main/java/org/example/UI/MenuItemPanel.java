@@ -22,7 +22,7 @@ public class MenuItemPanel extends JPanel {
     private final ServiceRestaurantImp restaurantService = new ServiceRestaurantImp();
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"ID", "Item Name", "Price", "Restaurant", "Restaurant ID"}, 0
+            new String[]{"", "ID", "Item Name", "Price", "Restaurant", "Veg", "Restaurant ID"}, 0
     ) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -31,7 +31,8 @@ public class MenuItemPanel extends JPanel {
 
         @Override
         public Class<?> getColumnClass(int column) {
-            if (column == 0 || column == 4) return Integer.class; // ID columns
+            if (column == 0) return Icon.class;
+            if (column == 1 || column == 6) return Integer.class; // ID columns
             return String.class;
         }
     };
@@ -42,6 +43,7 @@ public class MenuItemPanel extends JPanel {
     private final JTextField txtName = new JTextField();
     private final JTextField txtPrice = new JTextField();
     private final JComboBox<RestaurantResponse> restaurantCombo = new JComboBox<>();
+    private final JComboBox<String> cbVeg = new JComboBox<>(new String[]{"Veg", "Non-Veg"});
 
     // Search components
     private final JTextField txtSearch = new JTextField();
@@ -53,6 +55,12 @@ public class MenuItemPanel extends JPanel {
     private JButton btnDelete;
     private JButton btnClear;
     private JButton btnRefresh;
+    private JButton btnChooseImage;
+
+    // Image staged for the item currently in the form + id -> stored image path
+    private String selectedImagePath;
+    private final JLabel lblImagePreview = new JLabel("No Image", SwingConstants.CENTER);
+    private final java.util.Map<Integer, String> imagePathById = new java.util.HashMap<>();
 
     public MenuItemPanel() {
         initializeUI();
@@ -63,7 +71,7 @@ public class MenuItemPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.decode("#FFF6EC"));
+        setBackground(Color.decode("#F5F6F8"));
 
         // Top panel - Search and filter
         JPanel topPanel = createTopPanel();
@@ -75,9 +83,11 @@ public class MenuItemPanel extends JPanel {
         splitPane.setResizeWeight(0.3);
         splitPane.setContinuousLayout(true);
 
-        // Left panel - Form
-        JPanel formPanel = createFormPanel();
-        splitPane.setLeftComponent(formPanel);
+        // Left panel - Form (scrollable so it never gets clipped on smaller windows)
+        JScrollPane formScroll = new JScrollPane(createFormPanel());
+        formScroll.setBorder(null);
+        formScroll.getViewport().setBackground(Color.decode("#F5F6F8"));
+        splitPane.setLeftComponent(formScroll);
 
         // Right panel - Table
         JPanel tablePanel = createTablePanel();
@@ -88,7 +98,7 @@ public class MenuItemPanel extends JPanel {
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)
@@ -97,11 +107,11 @@ public class MenuItemPanel extends JPanel {
         // Title
         JLabel titleLabel = new JLabel("🍔 Menu Management");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-        titleLabel.setForeground(Color.decode("#6B4226"));
+        titleLabel.setForeground(Color.decode("#111827"));
 
         // Search panel
         JPanel searchPanel = new JPanel(new BorderLayout(5, 0));
-        searchPanel.setBackground(Color.decode("#FFF6EC"));
+        searchPanel.setBackground(Color.decode("#F5F6F8"));
 
         JLabel searchLabel = new JLabel("Search:");
         txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -119,82 +129,245 @@ public class MenuItemPanel extends JPanel {
     }
 
     private JPanel createFormPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBackground(Color.decode("#FFF6EC"));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel outer = new JPanel(new BorderLayout());
+        outer.setBackground(Color.decode("#F5F6F8"));
+        outer.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
 
-        JLabel titleLabel = new JLabel("✏️ Add/Edit Menu Item");
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        titleLabel.setForeground(Color.decode("#6B4226"));
-        titleLabel.setBounds(20, 20, 350, 30);
-        panel.add(titleLabel);
+        JPanel card = UITheme.createCard();
+        card.setLayout(new BorderLayout());
+        outer.add(card, BorderLayout.NORTH);
 
-        int yPos = 70;
-        addFormField("Item Name:", txtName, 20, yPos, panel);
-        yPos += 50;
-        addFormField("Price ($):", txtPrice, 20, yPos, panel);
-        yPos += 50;
+        JLabel titleLabel = new JLabel("✏️  Add / Edit Menu Item");
+        titleLabel.setFont(UITheme.FONT_TITLE);
+        titleLabel.setForeground(UITheme.TEXT_DARK);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(22, 24, 8, 24));
+        card.add(titleLabel, BorderLayout.NORTH);
 
-        // Restaurant selection with auto-fill info
-        JLabel lblRestaurant = new JLabel("Restaurant:");
-        lblRestaurant.setBounds(20, yPos, 100, 25);
-        lblRestaurant.setFont(new Font("SansSerif", Font.BOLD, 14));
-        lblRestaurant.setForeground(Color.decode("#6B4226"));
-        panel.add(lblRestaurant);
+        // ---- Image row: preview + choose button, side by side ----
+        JPanel imageRow = new JPanel(new BorderLayout(16, 0));
+        imageRow.setOpaque(false);
+        imageRow.setBorder(BorderFactory.createEmptyBorder(4, 24, 20, 24));
 
-        restaurantCombo.setBounds(130, yPos, 220, 30);
-        restaurantCombo.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        lblImagePreview.setPreferredSize(new Dimension(110, 90));
+        lblImagePreview.setOpaque(true);
+        lblImagePreview.setBackground(Color.WHITE);
+        lblImagePreview.setBorder(new UITheme.RoundedLineBorder(UITheme.BORDER, 12, 0, 0));
+        lblImagePreview.setFont(UITheme.FONT_MUTED);
+        lblImagePreview.setForeground(UITheme.TEXT_MUTED);
+        imageRow.add(lblImagePreview, BorderLayout.WEST);
+
+        JPanel imageSide = new JPanel();
+        imageSide.setOpaque(false);
+        imageSide.setLayout(new BoxLayout(imageSide, BoxLayout.Y_AXIS));
+        JLabel imgHint = new JLabel("<html>A photo makes this item stand out<br>in the customer's order screen.</html>");
+        imgHint.setFont(UITheme.FONT_MUTED);
+        imgHint.setForeground(UITheme.TEXT_MUTED);
+        imgHint.setAlignmentX(LEFT_ALIGNMENT);
+        btnChooseImage = createStyledButton("📷 Choose Image", UITheme.PRIMARY);
+        btnChooseImage.setAlignmentX(LEFT_ALIGNMENT);
+        btnChooseImage.addActionListener(e -> chooseImage());
+        imageSide.add(imgHint);
+        imageSide.add(Box.createVerticalStrut(10));
+        imageSide.add(btnChooseImage);
+        imageRow.add(imageSide, BorderLayout.CENTER);
+
+        card.add(imageRow, BorderLayout.CENTER);
+
+        // ---- Fields ----
+        JPanel fields = new JPanel(new GridBagLayout());
+        fields.setOpaque(false);
+        fields.setBorder(BorderFactory.createEmptyBorder(0, 24, 8, 24));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 0, 8, 0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.weightx = 1;
+
+        gbc.gridy = 0;
+        fields.add(fieldGroup("Item Name", txtName), gbc);
+        gbc.gridy = 1;
+        fields.add(fieldGroup("Price ($)", txtPrice), gbc);
+
+        JLabel lblRestaurant = new JLabel("Restaurant");
+        lblRestaurant.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 13));
+        lblRestaurant.setForeground(UITheme.TEXT_DARK);
+        lblRestaurant.setBorder(BorderFactory.createEmptyBorder(0, 2, 6, 0));
+
+        restaurantCombo.setFont(UITheme.FONT_BODY);
         restaurantCombo.setRenderer(new RestaurantComboRenderer());
-        panel.add(restaurantCombo);
+        restaurantCombo.setPreferredSize(new Dimension(10, 40));
 
-        // Restaurant info display
-        JLabel lblRestaurantInfo = new JLabel("Select a restaurant or click one in the table");
-        lblRestaurantInfo.setBounds(20, yPos + 35, 330, 20);
-        lblRestaurantInfo.setFont(new Font("SansSerif", Font.ITALIC, 11));
-        lblRestaurantInfo.setForeground(Color.GRAY);
-        panel.add(lblRestaurantInfo);
+        JPanel restaurantGroup = new JPanel();
+        restaurantGroup.setOpaque(false);
+        restaurantGroup.setLayout(new BoxLayout(restaurantGroup, BoxLayout.Y_AXIS));
+        lblRestaurant.setAlignmentX(LEFT_ALIGNMENT);
+        restaurantCombo.setAlignmentX(LEFT_ALIGNMENT);
+        restaurantGroup.add(lblRestaurant);
+        restaurantGroup.add(restaurantCombo);
 
-        yPos += 70;
+        gbc.gridy = 2;
+        fields.add(restaurantGroup, gbc);
 
-        // Buttons
-        btnAdd = createStyledButton("Add Item", Color.decode("#6FCF97"));
-        btnUpdate = createStyledButton("Update", Color.decode("#FF9F45"));
-        btnDelete = createStyledButton("Delete", Color.decode("#FF6B5B"));
-        btnClear = createStyledButton("Clear", Color.decode("#D8A48F"));
-        btnRefresh = createStyledButton("Refresh", Color.decode("#FFA94D"));
+        JLabel lblVeg = new JLabel("Type");
+        lblVeg.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 13));
+        lblVeg.setForeground(UITheme.TEXT_DARK);
+        lblVeg.setBorder(BorderFactory.createEmptyBorder(0, 2, 6, 0));
 
-        btnAdd.setBounds(20, yPos, 160, 35);
-        btnUpdate.setBounds(190, yPos, 160, 35);
-        yPos += 50;
-        btnDelete.setBounds(20, yPos, 160, 35);
-        btnClear.setBounds(190, yPos, 160, 35);
-        yPos += 50;
-        btnRefresh.setBounds(20, yPos, 330, 35);
+        cbVeg.setFont(UITheme.FONT_BODY);
+        cbVeg.setPreferredSize(new Dimension(10, 40));
 
-        panel.add(btnAdd);
-        panel.add(btnUpdate);
-        panel.add(btnDelete);
-        panel.add(btnClear);
-        panel.add(btnRefresh);
+        JPanel vegGroup = new JPanel();
+        vegGroup.setOpaque(false);
+        vegGroup.setLayout(new BoxLayout(vegGroup, BoxLayout.Y_AXIS));
+        lblVeg.setAlignmentX(LEFT_ALIGNMENT);
+        cbVeg.setAlignmentX(LEFT_ALIGNMENT);
+        vegGroup.add(lblVeg);
+        vegGroup.add(cbVeg);
 
-        return panel;
+        gbc.gridy = 3;
+        fields.add(vegGroup, gbc);
+
+        JLabel lblRestaurantInfo = new JLabel("Tip: click a restaurant cell in the table to auto-fill this");
+        lblRestaurantInfo.setFont(UITheme.FONT_MUTED);
+        lblRestaurantInfo.setForeground(UITheme.TEXT_MUTED);
+        gbc.gridy = 4;
+        gbc.insets = new Insets(2, 0, 8, 0);
+        fields.add(lblRestaurantInfo, gbc);
+
+        card.add(fields, BorderLayout.SOUTH);
+
+        // ---- Actions ----
+        JPanel actions = new JPanel(new GridLayout(3, 1, 0, 10));
+        actions.setOpaque(false);
+        actions.setBorder(BorderFactory.createEmptyBorder(4, 24, 24, 24));
+
+        JPanel row1 = new JPanel(new GridLayout(1, 2, 10, 0));
+        row1.setOpaque(false);
+        btnAdd = createStyledButton("Add Item", UITheme.SUCCESS);
+        btnUpdate = createStyledButton("Update", UITheme.PRIMARY);
+        row1.add(btnAdd);
+        row1.add(btnUpdate);
+
+        JPanel row2 = new JPanel(new GridLayout(1, 2, 10, 0));
+        row2.setOpaque(false);
+        btnDelete = createStyledButton("Delete", UITheme.SECONDARY);
+        btnClear = createStyledButton("Clear", UITheme.NEUTRAL);
+        row2.add(btnDelete);
+        row2.add(btnClear);
+
+        btnRefresh = createStyledButton("Refresh List", UITheme.PRIMARY);
+
+        actions.add(row1);
+        actions.add(row2);
+        actions.add(btnRefresh);
+
+        JPanel cardWithActions = new JPanel(new BorderLayout());
+        cardWithActions.setOpaque(false);
+        cardWithActions.add(card, BorderLayout.CENTER);
+        cardWithActions.add(actions, BorderLayout.SOUTH);
+
+        outer.removeAll();
+        outer.add(cardWithActions, BorderLayout.NORTH);
+
+        return outer;
+    }
+
+    private JPanel fieldGroup(String label, JTextField field) {
+        JPanel group = new JPanel();
+        group.setOpaque(false);
+        group.setLayout(new BoxLayout(group, BoxLayout.Y_AXIS));
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font(UITheme.FONT_BODY.getFamily(), Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_DARK);
+        lbl.setBorder(BorderFactory.createEmptyBorder(0, 2, 6, 0));
+        lbl.setAlignmentX(LEFT_ALIGNMENT);
+
+        field.setFont(UITheme.FONT_BODY);
+        field.setBorder(new UITheme.RoundedLineBorder(UITheme.BORDER, 12, 10, 12));
+        field.setAlignmentX(LEFT_ALIGNMENT);
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        field.setPreferredSize(new Dimension(10, 40));
+
+        group.add(lbl);
+        group.add(field);
+        return group;
+    }
+
+    private void chooseImage() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Menu Item Image");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Image files", "jpg", "jpeg", "png", "gif"));
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+        java.io.File selected = chooser.getSelectedFile();
+        try {
+            java.io.File dir = new java.io.File("images/menu");
+            dir.mkdirs();
+            String ext = "";
+            int dot = selected.getName().lastIndexOf('.');
+            if (dot >= 0) ext = selected.getName().substring(dot);
+            java.io.File dest = new java.io.File(dir, "menu_" + System.currentTimeMillis() + ext);
+            java.nio.file.Files.copy(selected.toPath(), dest.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            selectedImagePath = "images/menu/" + dest.getName();
+            showImagePreview(selectedImagePath);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not load image: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showImagePreview(String path) {
+        lblImagePreview.setIcon(null);
+        if (path == null || path.isBlank()) {
+            lblImagePreview.setText("No Image");
+            return;
+        }
+        java.io.File file = new java.io.File(path);
+        if (!file.exists()) {
+            lblImagePreview.setText("Missing");
+            return;
+        }
+        Image scaled = new ImageIcon(file.getAbsolutePath())
+                .getImage().getScaledInstance(100, 80, Image.SCALE_SMOOTH);
+        lblImagePreview.setText("");
+        lblImagePreview.setIcon(new ImageIcon(scaled));
     }
 
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.decode("#FFF6EC"));
+        panel.setBackground(Color.decode("#F5F6F8"));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 20));
 
         // Configure table
-        menuTable.setRowHeight(35);
+        menuTable.setRowHeight(52);
         menuTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        menuTable.getTableHeader().setBackground(Color.decode("#8B5E3C"));
+        menuTable.getTableHeader().setBackground(Color.decode("#4F46E5"));
         menuTable.getTableHeader().setForeground(Color.WHITE);
         menuTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        // Hide the Restaurant ID column (index 4) but keep it for reference
-        menuTable.removeColumn(menuTable.getColumnModel().getColumn(4));
+        // Thumbnail column: small, fixed width, no header text
+        menuTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        menuTable.getColumnModel().getColumn(0).setMaxWidth(50);
+        menuTable.getColumnModel().getColumn(0).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                lbl.setIcon(value instanceof Icon ? (Icon) value : null);
+                lbl.setBackground(isSelected ? new Color(224, 231, 255)
+                        : (row % 2 == 0 ? Color.decode("#F5F6F8") : new Color(249, 250, 251)));
+                lbl.setOpaque(true);
+                return lbl;
+            }
+        });
+
+        // Hide the Restaurant ID column (index 6) but keep it for reference
+        menuTable.removeColumn(menuTable.getColumnModel().getColumn(6));
 
         // Set up table sorter
         tableSorter = new TableRowSorter<>(tableModel);
@@ -209,20 +382,20 @@ public class MenuItemPanel extends JPanel {
 
                 if (!isSelected) {
                     if (row % 2 == 0) {
-                        c.setBackground(Color.decode("#FFF6EC"));
+                        c.setBackground(Color.decode("#F5F6F8"));
                     } else {
-                        c.setBackground(new Color(255, 244, 230));
+                        c.setBackground(new Color(249, 250, 251));
                     }
                 }
 
                 // Color code price column
-                if (column == 2) {
-                    setForeground(Color.decode("#5FAD56")); // Green for price
+                if (column == 3) {
+                    setForeground(Color.decode("#16A34A")); // Green for price
                     setFont(getFont().deriveFont(Font.BOLD));
                 }
 
                 // Center align ID column
-                if (column == 0) {
+                if (column == 1) {
                     setHorizontalAlignment(SwingConstants.CENTER);
                 }
 
@@ -235,11 +408,11 @@ public class MenuItemPanel extends JPanel {
 
         // Add table header with quick actions
         JPanel tableHeader = new JPanel(new BorderLayout());
-        tableHeader.setBackground(Color.decode("#FFF6EC"));
+        tableHeader.setBackground(Color.decode("#F5F6F8"));
 
         JLabel tableTitle = new JLabel("📋 Menu Items List");
         tableTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
-        tableTitle.setForeground(Color.decode("#6B4226"));
+        tableTitle.setForeground(Color.decode("#111827"));
 
         JLabel countLabel = new JLabel("Total: 0 items");
         countLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -294,11 +467,11 @@ public class MenuItemPanel extends JPanel {
                 int column = menuTable.columnAtPoint(e.getPoint());
                 int modelColumn = menuTable.convertColumnIndexToModel(column);
 
-                if (row >= 0 && modelColumn == 3) { // Restaurant column
+                if (row >= 0 && modelColumn == 4) { // Restaurant column
                     String restaurantName = tableModel.getValueAt(
-                            menuTable.convertRowIndexToModel(row), 3).toString();
+                            menuTable.convertRowIndexToModel(row), 4).toString();
                     int restaurantId = (int) tableModel.getValueAt(
-                            menuTable.convertRowIndexToModel(row), 4);
+                            menuTable.convertRowIndexToModel(row), 6);
 
                     // Find and select the restaurant in combo box
                     for (int i = 0; i < restaurantCombo.getItemCount(); i++) {
@@ -307,9 +480,9 @@ public class MenuItemPanel extends JPanel {
                             restaurantCombo.setSelectedIndex(i);
 
                             // Highlight the restaurant selection
-                            restaurantCombo.setBackground(new Color(255, 224, 178));
+                            restaurantCombo.setBackground(new Color(224, 231, 255));
                             Timer timer = new Timer(1000, evt -> {
-                                restaurantCombo.setBackground(Color.decode("#FFF6EC"));
+                                restaurantCombo.setBackground(Color.decode("#F5F6F8"));
                             });
                             timer.setRepeats(false);
                             timer.start();
@@ -375,9 +548,9 @@ public class MenuItemPanel extends JPanel {
         } else {
             List<RowFilter<Object, Object>> filters = new ArrayList<>();
 
-            // Search in all columns
+            // Search in all text columns (skip the thumbnail icon column and the hidden Restaurant ID column)
             for (int i = 0; i < tableModel.getColumnCount(); i++) {
-                if (i != 4) { // Skip hidden Restaurant ID column
+                if (i != 0 && i != 6) {
                     filters.add(RowFilter.regexFilter("(?i)" + searchText, i));
                 }
             }
@@ -403,16 +576,28 @@ public class MenuItemPanel extends JPanel {
 
     private void loadMenuItems() {
         tableModel.setRowCount(0);
+        imagePathById.clear();
         try {
             List<MenuItemResponse> menuItems = menuService.getAllMenuItems();
 
+            // Fetch restaurants ONCE and index by id, instead of hitting the
+            // remote database once per menu item (which made the dashboard take
+            // minutes to open with a few hundred items).
+            java.util.Map<Integer, String> restaurantNames = new java.util.HashMap<>();
+            for (RestaurantResponse restaurant : restaurantService.findAllRestaurants()) {
+                restaurantNames.put(restaurant.getId(), restaurant.getName());
+            }
+
             for (MenuItemResponse item : menuItems) {
-                String restaurantName = getRestaurantName(item.getRestaurant());
+                imagePathById.put(item.getId(), item.getImagePath());
+                String restaurantName = restaurantNames.getOrDefault(item.getRestaurant(), "Unknown Restaurant");
                 tableModel.addRow(new Object[]{
+                        rowThumbnail(item.getImagePath(), item.getName()),
                         item.getId(),
                         item.getName(),
                         String.format("$%.2f", parsePrice(item.getPrice())),
                         restaurantName,
+                        Boolean.TRUE.equals(item.getIsVeg()) ? "Veg" : "Non-Veg",
                         item.getRestaurant() // Store ID for auto-fill
                 });
             }
@@ -442,32 +627,18 @@ public class MenuItemPanel extends JPanel {
         }
     }
 
-    private String getRestaurantName(int restaurantId) {
-        try {
-            List<RestaurantResponse> restaurants = restaurantService.findAllRestaurants();
-            for (RestaurantResponse restaurant : restaurants) {
-                if (restaurant.getId() == restaurantId) {
-                    return restaurant.getName();
-                }
-            }
-        } catch (Exception ex) {
-            // Ignore - return unknown
-        }
-        return "Unknown Restaurant";
-    }
-
     private void fillFormFromSelectedRow() {
         int selectedRow = menuTable.getSelectedRow();
         if (selectedRow == -1) return;
 
         int modelRow = menuTable.convertRowIndexToModel(selectedRow);
 
-        txtName.setText(tableModel.getValueAt(modelRow, 1).toString());
+        txtName.setText(tableModel.getValueAt(modelRow, 2).toString());
 
-        String price = tableModel.getValueAt(modelRow, 2).toString();
+        String price = tableModel.getValueAt(modelRow, 3).toString();
         txtPrice.setText(price.replace("$", "").trim());
 
-        int restaurantId = (int) tableModel.getValueAt(modelRow, 4);
+        int restaurantId = (int) tableModel.getValueAt(modelRow, 6);
         for (int i = 0; i < restaurantCombo.getItemCount(); i++) {
             RestaurantResponse restaurant = restaurantCombo.getItemAt(i);
             if (restaurant.getId() == restaurantId) {
@@ -475,6 +646,11 @@ public class MenuItemPanel extends JPanel {
                 break;
             }
         }
+
+        cbVeg.setSelectedItem(tableModel.getValueAt(modelRow, 5).toString());
+
+        selectedImagePath = imagePathById.get((int) tableModel.getValueAt(modelRow, 1));
+        showImagePreview(selectedImagePath);
     }
 
     private void addMenuItem() {
@@ -508,6 +684,8 @@ public class MenuItemPanel extends JPanel {
             request.setPrice(txtPrice.getText().trim());
             request.setRestaurant(selectedRestaurant.getId());
             request.setActive(true);
+            request.setImagePath(selectedImagePath);
+            request.setIsVeg("Veg".equals(cbVeg.getSelectedItem()));
 
             menuService.createMenuItem(request);
             JOptionPane.showMessageDialog(this,
@@ -543,11 +721,13 @@ public class MenuItemPanel extends JPanel {
 
             int modelRow = menuTable.convertRowIndexToModel(selectedRow);
             MenuItemRequest request = new MenuItemRequest();
-            request.setId((int) tableModel.getValueAt(modelRow, 0));
+            request.setId((int) tableModel.getValueAt(modelRow, 1));
             request.setName(txtName.getText().trim());
             request.setPrice(txtPrice.getText().trim());
             request.setRestaurant(selectedRestaurant.getId());
             request.setActive(true);
+            request.setImagePath(selectedImagePath);
+            request.setIsVeg("Veg".equals(cbVeg.getSelectedItem()));
 
             menuService.updateMenuItem(request);
             JOptionPane.showMessageDialog(this,
@@ -579,7 +759,7 @@ public class MenuItemPanel extends JPanel {
             try {
                 int modelRow = menuTable.convertRowIndexToModel(selectedRow);
                 MenuItemRequest request = new MenuItemRequest();
-                request.setId((int) tableModel.getValueAt(modelRow, 0));
+                request.setId((int) tableModel.getValueAt(modelRow, 1));
 
                 menuService.deleteMenuItem(request);
                 JOptionPane.showMessageDialog(this,
@@ -602,8 +782,35 @@ public class MenuItemPanel extends JPanel {
         if (restaurantCombo.getItemCount() > 0) {
             restaurantCombo.setSelectedIndex(0);
         }
+        cbVeg.setSelectedIndex(0);
+        selectedImagePath = null;
+        showImagePreview(null);
         menuTable.clearSelection();
         tableSorter.setRowFilter(null);
+    }
+
+    /** Small 32x32 table thumbnail: the item's photo if set, else a lettered placeholder. */
+    private Icon rowThumbnail(String imagePath, String name) {
+        if (imagePath != null && !imagePath.isBlank()) {
+            java.io.File f = new java.io.File(imagePath);
+            if (f.exists()) {
+                return new ImageIcon(new ImageIcon(f.getAbsolutePath())
+                        .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+            }
+        }
+        java.awt.image.BufferedImage img =
+                new java.awt.image.BufferedImage(32, 32, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(UITheme.PRIMARY_SOFT);
+        g.fillRoundRect(0, 0, 32, 32, 8, 8);
+        g.setColor(UITheme.PRIMARY);
+        g.setFont(new Font("SansSerif", Font.BOLD, 14));
+        String ch = (name != null && !name.isBlank()) ? name.trim().substring(0, 1).toUpperCase() : "?";
+        FontMetrics fm = g.getFontMetrics();
+        g.drawString(ch, (32 - fm.stringWidth(ch)) / 2, (32 + fm.getAscent()) / 2 - 3);
+        g.dispose();
+        return new ImageIcon(img);
     }
 
     private double parsePrice(String price) {
@@ -615,19 +822,6 @@ public class MenuItemPanel extends JPanel {
     }
 
     // UI Helper methods
-    private void addFormField(String label, JTextField field, int x, int y, JPanel panel) {
-        JLabel lbl = new JLabel(label);
-        lbl.setBounds(x, y, 100, 25);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 14));
-        lbl.setForeground(Color.decode("#6B4226"));
-        panel.add(lbl);
-
-        field.setBounds(x + 110, y, 220, 30);
-        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        field.setBorder(new UITheme.RoundedLineBorder(UITheme.NEUTRAL, 14, 5, 10));
-        panel.add(field);
-    }
-
     private JButton createStyledButton(String text, Color color) {
         return UITheme.createButton(text, color);
     }

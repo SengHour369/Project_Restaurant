@@ -13,36 +13,38 @@ public class CustomerApp extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Food Order System - Customer");
-        setSize(1100, 650);
+        setTitle("Food Order System — Customer");
+        setSize(1180, 760);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        getContentPane().setBackground(UITheme.BACKGROUND);
 
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.decode("#FF9F45"));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-
-        JLabel welcomeLabel = new JLabel("👋 Welcome, " + currentUser.getName() + "!");
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-        welcomeLabel.setForeground(Color.WHITE);
-        headerPanel.add(welcomeLabel, BorderLayout.WEST);
-
-        JButton btnLogout = UITheme.createButton("👋 Logout", UITheme.SECONDARY);
+        JButton btnLogout = UITheme.createOutlineButton("Logout");
         btnLogout.addActionListener(e -> {
             new LoginFrame().setVisible(true);
             dispose();
         });
-        headerPanel.add(btnLogout, BorderLayout.EAST);
+        TopBar topBar = new TopBar("Cafeteria", currentUser.getName(), currentUser.getImage_path(), btnLogout);
 
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setFont(new Font("SansSerif", Font.BOLD, 14));
+        CardLayout cardLayout = new CardLayout();
+        JPanel content = new JPanel(cardLayout);
+        content.setBackground(UITheme.BACKGROUND);
 
-        tabbedPane.addTab("🍕 Place Order", new OrderPanel(currentUser));
-        tabbedPane.addTab("🧾 Order History", new OrderHistoryPanel(currentUser));
-        tabbedPane.addTab("👤 My Profile", new UserPanel(currentUser));
+        content.add(new OrderPanel(currentUser), "order");
+        content.add(new OrderHistoryPanel(currentUser), "history");
+        content.add(new ProfilePanel(currentUser), "profile");
+
+        SidebarNav sidebar = new SidebarNav();
+        sidebar.addItem("🍕", "Place Order", () -> cardLayout.show(content, "order"));
+        sidebar.addItem("🧾", "Order History", () -> cardLayout.show(content, "history"));
+        sidebar.addItem("👤", "My Profile", () -> cardLayout.show(content, "profile"));
+
+        JPanel body = new JPanel(new BorderLayout());
+        body.add(sidebar, BorderLayout.WEST);
+        body.add(content, BorderLayout.CENTER);
 
         setLayout(new BorderLayout());
-        add(headerPanel, BorderLayout.NORTH);
-        add(tabbedPane, BorderLayout.CENTER);
+        add(topBar, BorderLayout.NORTH);
+        add(body, BorderLayout.CENTER);
     }
 }

@@ -10,11 +10,12 @@ public class Restaurant extends BaseEntity {
     private Integer rating;
     private String phone_number;
     private String location;
+    private String image_path;
 
 
     public Restaurant( String name, String category, Integer rating,
-                      String phone_number, String location,
-                      LocalDateTime opening_date, LocalDateTime closing_date) {
+                       String phone_number, String location,
+                       LocalDateTime opening_date, LocalDateTime closing_date) {
 
         this.name = name;
         this.category = category;
@@ -72,5 +73,12 @@ public class Restaurant extends BaseEntity {
         this.location = location;
     }
 
+    public String getImage_path() {
+        return image_path;
+    }
+
+    public void setImage_path(String image_path) {
+        this.image_path = image_path;
+    }
 
 }

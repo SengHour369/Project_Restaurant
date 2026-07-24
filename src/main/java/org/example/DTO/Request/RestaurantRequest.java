@@ -10,14 +10,16 @@ public class RestaurantRequest  {
     private Integer rating;
     private String phone_number;
     private String location;
+    private String image_path;
 
     public RestaurantRequest( String name, String category, Integer rating,
-                      String phone_number, String location) {
+                              String phone_number, String location, String image_path) {
         this.name = name;
         this.category = category;
         this.rating = rating;
         this.phone_number = phone_number;
         this.location = location;
+        this.image_path = image_path;
 
     }
 
@@ -61,5 +63,12 @@ public class RestaurantRequest  {
         this.location = location;
     }
 
+    public String getImage_path() {
+        return image_path;
+    }
+
+    public void setImage_path(String image_path) {
+        this.image_path = image_path;
+    }
 
 }

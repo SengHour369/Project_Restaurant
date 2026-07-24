@@ -13,7 +13,7 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
 
     @Override
     public MenuItemResponse createMenuItem(MenuItemRequest req) {
-        String sql = "INSERT INTO menu_items (restaurant_id, code, name, description, active) VALUES (?,?,?,?,?) RETURNING id";
+        String sql = "INSERT INTO menu_items (restaurant_id, code, name, description, active, image_path, is_veg) VALUES (?,?,?,?,?,?,?) RETURNING id";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -22,11 +22,17 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
             ps.setString(3, req.getName());
             ps.setString(4, req.getDescription());
             ps.setBoolean(5, req.getActive());
+            ps.setString(6, req.getImagePath());
+            ps.setBoolean(7, req.getIsVeg() != null ? req.getIsVeg() : true);
 
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 int id = rs.getInt("id");
-                return new MenuItemResponse(req.getRestaurant(), req.getPrice(), req.getName(), req.getDescription(), req.getActive());
+                MenuItemResponse m = new MenuItemResponse(req.getRestaurant(), req.getPrice(), req.getName(), req.getDescription(), req.getActive());
+                m.setId(id);
+                m.setImagePath(req.getImagePath());
+                m.setIsVeg(req.getIsVeg());
+                return m;
             }
 
         } catch (Exception e) {
@@ -37,7 +43,7 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
 
     @Override
     public MenuItemResponse updateMenuItem(MenuItemRequest req) {
-        String sql = "UPDATE menu_items SET restaurant_id=?, code=?, name=?, description=?, active=? WHERE id=?";
+        String sql = "UPDATE menu_items SET restaurant_id=?, code=?, name=?, description=?, active=?, image_path=?, is_veg=? WHERE id=?";
         try(Connection c = DatabaseConnection.getConnection();
             PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -46,10 +52,16 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
             ps.setString(3, req.getName());
             ps.setString(4, req.getDescription());
             ps.setBoolean(5, req.getActive());
-            ps.setInt(6, req.getId());
+            ps.setString(6, req.getImagePath());
+            ps.setBoolean(7, req.getIsVeg() != null ? req.getIsVeg() : true);
+            ps.setInt(8, req.getId());
 
             ps.executeUpdate();
-            return new MenuItemResponse(req.getRestaurant(), req.getPrice(), req.getName(), req.getDescription(), req.getActive());
+            MenuItemResponse m = new MenuItemResponse(req.getRestaurant(), req.getPrice(), req.getName(), req.getDescription(), req.getActive());
+            m.setId(req.getId());
+            m.setImagePath(req.getImagePath());
+            m.setIsVeg(req.getIsVeg());
+            return m;
 
         } catch(Exception e){
             e.printStackTrace();
@@ -80,9 +92,11 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
             ps.setInt(1, req);
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
-
-
-                return new MenuItemResponse(rs.getInt("restaurant_id"), rs.getString("code"), rs.getString("name"), rs.getString("description"), rs.getBoolean("active"));
+                MenuItemResponse m = new MenuItemResponse(rs.getInt("restaurant_id"), rs.getString("code"), rs.getString("name"), rs.getString("description"), rs.getBoolean("active"));
+                m.setId(rs.getInt("id"));
+                m.setImagePath(rs.getString("image_path"));
+                m.setIsVeg(rs.getBoolean("is_veg"));
+                return m;
             }
 
         } catch(Exception e){
@@ -104,6 +118,8 @@ public class ServiceMenuItemImp implements ServiceMenuItem {
 
                 MenuItemResponse m = new MenuItemResponse( rs.getInt("restaurant_id"), rs.getString("code"), rs.getString("name"), rs.getString("description"), rs.getBoolean("active"));
                 m.setId(rs.getInt("id"));
+                m.setImagePath(rs.getString("image_path"));
+                m.setIsVeg(rs.getBoolean("is_veg"));
                 list.add(m);
             }
 

@@ -11,6 +11,7 @@ public class User extends BaseEntity {
     private java.lang.String Address;
     private java.lang.String email;
     private java.lang.String Status;
+    private java.lang.String image_path;
 
     public User(java.lang.String name, String gender, java.lang.String data_of_birth,
                 java.lang.String phone_number, java.lang.String address, java.lang.String email, java.lang.String status) {
@@ -90,6 +91,14 @@ public class User extends BaseEntity {
 
     public void setStatus(java.lang.String status) {
         Status = status;
+    }
+
+    public java.lang.String getImage_path() {
+        return image_path;
+    }
+
+    public void setImage_path(java.lang.String image_path) {
+        this.image_path = image_path;
     }
 
 

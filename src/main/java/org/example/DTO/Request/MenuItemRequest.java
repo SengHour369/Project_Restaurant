@@ -9,9 +9,11 @@ public class MenuItemRequest extends BaseEntity {
     private String name;
     private String description;
     private Boolean active;
+    private String image_path;
+    private Boolean isVeg;
 
     public MenuItemRequest(int restaurant, String code,
-                    String name, String description, Boolean active) {
+                           String name, String description, Boolean active) {
         this.restaurant = restaurant;
         this.price = code;
         this.name = name;
@@ -61,5 +63,21 @@ public class MenuItemRequest extends BaseEntity {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getImagePath() {
+        return image_path;
+    }
+
+    public void setImagePath(String image_path) {
+        this.image_path = image_path;
+    }
+
+    public Boolean getIsVeg() {
+        return isVeg;
+    }
+
+    public void setIsVeg(Boolean isVeg) {
+        this.isVeg = isVeg;
     }
 }

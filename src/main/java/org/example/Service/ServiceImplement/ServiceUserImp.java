@@ -16,14 +16,11 @@ public class ServiceUserImp implements ServiceUser {
     @Override
     public void create(UserRequest r) throws MessageException {
 
-//        userServiceHandler.usernameExists(r.getName());
-//        userServiceHandler.phone_numberExists(r.getPhone());
-//        userServiceHandler.EmailExists(r.getEmail());
-//        userServiceHandler.HasValidUsername(r.getName());
+
         String sql = """
             INSERT INTO users
-            (name, gender, date_of_birth, phone_number, address, email, password_hash, status)
-            VALUES (?, ?::user_gender, ?::date, ?, ?, ?, ?, ?::user_status)
+            (name, gender, date_of_birth, phone_number, address, email, password_hash, status, image_path)
+            VALUES (?, ?::user_gender, ?::date, ?, ?, ?, ?, ?::user_status, ?)
         """;
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -36,6 +33,7 @@ public class ServiceUserImp implements ServiceUser {
             ps.setString(6, r.getEmail());
             ps.setString(7, r.getPassword());
             ps.setString(8, r.getStatus());
+            ps.setString(9, r.getImage_path());
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -48,7 +46,7 @@ public class ServiceUserImp implements ServiceUser {
         String sql = """
             UPDATE users SET
             name=?, gender=?::user_gender, date_of_birth=?::date, phone_number=?,
-            address=?, email=?, password_hash=?, status=?::user_status
+            address=?, email=?, password_hash=?, status=?::user_status, image_path=?
             WHERE id=?
         """;
 
@@ -63,7 +61,8 @@ public class ServiceUserImp implements ServiceUser {
             ps.setString(6, r.getEmail());
             ps.setString(7, r.getPassword());
             ps.setString(8, r.getStatus());
-            ps.setInt(9, id);
+            ps.setString(9, r.getImage_path());
+            ps.setInt(10, id);
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -136,6 +135,23 @@ public class ServiceUserImp implements ServiceUser {
         return null;
     }
 
+    // Returns the stored password for a user, so callers (e.g. the profile screen)
+    // can leave the password unchanged when the user doesn't enter a new one.
+    public String getPasswordHash(int id) {
+        String sql = "SELECT password_hash FROM users WHERE id=?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getString("password_hash");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private String blankToNull(String value) {
         return (value == null || value.isBlank()) ? null : value;
     }
@@ -150,6 +166,7 @@ public class ServiceUserImp implements ServiceUser {
         u.setAddress(rs.getString("address"));
         u.setEmail(rs.getString("email"));
         u.setStatus(rs.getString("status"));
+        u.setImage_path(rs.getString("image_path"));
         return u;
     }
 }

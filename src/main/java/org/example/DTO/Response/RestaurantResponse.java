@@ -10,16 +10,18 @@ public class RestaurantResponse extends BaseEntity {
     private Integer rating;
     private String phone_number;
     private String location;
+    private String image_path;
 
 
     public RestaurantResponse(int id, String name, String category, Integer rating,
-                      String phone_number, String location) {
+                              String phone_number, String location, String image_path) {
         this.setId(id);
         this.name = name;
         this.category = category;
         this.rating = rating;
         this.phone_number = phone_number;
         this.location = location;
+        this.image_path = image_path;
 
     }
 
@@ -34,6 +36,7 @@ public class RestaurantResponse extends BaseEntity {
         this.setRating(restaurantResponse.getRating());
         this.setPhone_number(restaurantResponse.getPhone_number());
         this.setLocation(restaurantResponse.getLocation());
+        this.setImage_path(restaurantResponse.getImage_path());
     }
 
     public String getName() {
@@ -76,6 +79,14 @@ public class RestaurantResponse extends BaseEntity {
         this.location = location;
     }
 
+    public String getImage_path() {
+        return image_path;
+    }
+
+    public void setImage_path(String image_path) {
+        this.image_path = image_path;
+    }
+
     @Override
     public String toString() {
         return "RestaurantResponse{" +
@@ -85,6 +96,7 @@ public class RestaurantResponse extends BaseEntity {
                 ", rating=" + rating +
                 ", phone_number='" + phone_number + '\'' +
                 ", location='" + location + '\'' +
+                ", image_path='" + image_path + '\'' +
                 '}';
     }
 }
